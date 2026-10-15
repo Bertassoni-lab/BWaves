@@ -1,0 +1,5 @@
+# Documentação do projeto não fica acessível pelo site
+<FilesMatch "\.(md|sql)$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 ^/docs(/.*)?$
