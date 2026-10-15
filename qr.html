@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>QR · Vitrine BW</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* Tela para o painel de LED e para imprimir nas mesas */
+  body{min-height:100vh;display:grid;place-items:center}
+  .qrs{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,56px);padding:32px 18px;max-width:1100px;width:100%}
+  @media (max-width:700px){ .qrs{grid-template-columns:1fr} }
+  .q{display:grid;justify-items:center;align-content:start;gap:16px;text-align:center}
+  .q img{width:min(100%,380px);background:#fff;border-radius:18px;padding:14px}
+  .q h2{font-style:italic;font-size:clamp(34px,5vw,56px);line-height:1}
+  .q p{margin:0;color:var(--muted);font-size:clamp(16px,2vw,20px)}
+  .q .url{color:var(--gold-2);font-weight:600}
+  header.h{grid-column:1/-1;text-align:center;display:grid;gap:8px}
+</style>
+</head>
+<body>
+<div class="qrs">
+  <header class="h"><div class="eyebrow">Business Wave · 5ª edição</div><h1 style="font-style:italic;font-size:clamp(40px,6vw,72px);line-height:1">Vitrine BW</h1></header>
+  <div class="q"><img src="assets/qr-cadastro.svg" alt="QR code para cadastrar o negócio"><h2>Coloque seu negócio na vitrine</h2><p>Aponte a câmera e cadastre em 2 minutos.</p></div>
+  <div class="q"><img src="assets/qr-vitrine.svg" alt="QR code para ver a vitrine"><h2>Conheça as mulheres do BW</h2><p>Ofertas exclusivas e conexões.</p><p class="url">bw.okgo.dev.br</p></div>
+</div>
+</body>
+</html>

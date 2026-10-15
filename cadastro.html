@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entrar na Vitrine BW · Business Wave</title>
+<meta name="description" content="Coloque seu negócio na Vitrine BW em 2 minutos.">
+<meta name="theme-color" content="#0c0b09">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><span class="mono">BW</span><b>Vitrine BW</b></a>
+    <nav><a class="btn sm ghost" href="./">Ver a vitrine</a></nav>
+  </div>
+</header>
+
+<main class="wrap" style="padding-block:32px 64px">
+  <div id="intro" style="display:grid;gap:10px;margin-bottom:26px;max-width:640px">
+    <div class="eyebrow">Business Wave · 5ª edição</div>
+    <h1 style="font-style:italic;font-size:clamp(38px,8vw,58px);line-height:1">Coloque seu negócio na vitrine</h1>
+    <p style="color:var(--muted);margin:0">Leva 2 minutos. Só os quatro primeiros campos são obrigatórios; o resto você completa como quiser.</p>
+  </div>
+
+  <form class="form" id="f" novalidate>
+    <div class="two">
+      <div class="field"><label for="responsavel">Seu nome</label><input id="responsavel" maxlength="80" required autocomplete="name"></div>
+      <div class="field"><label for="nome_negocio">Nome do negócio</label><input id="nome_negocio" maxlength="80" required autocomplete="organization"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="whatsapp">WhatsApp</label><input id="whatsapp" maxlength="20" inputmode="tel" placeholder="(12) 9 9999-9999" autocomplete="tel" required></div>
+      <div class="field"><label for="segmento">Segmento</label><select id="segmento" required><option value="">Escolha</option></select></div>
+    </div>
+
+    <div class="offer field">
+      <label for="oferta_bw" style="color:var(--gold-2)">Oferta exclusiva BW</label>
+      <span class="h">Uma condição só para quem é do Business Wave. É o que mais chama atenção na vitrine. Ex.: 10% de desconto, avaliação gratuita, frete grátis.</span>
+      <input id="oferta_bw" maxlength="160" placeholder="Ex.: 15% off na primeira compra">
+    </div>
+
+    <div class="two">
+      <div class="field"><label for="instagram">Instagram</label><input id="instagram" maxlength="60" placeholder="@seunegocio"></div>
+      <div class="field">
+        <span class="l">Logo ou foto</span>
+        <div class="preview"><span class="logo" id="logoPrev" aria-hidden="true">BW</span><input id="logo" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher logo ou foto"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="descricao">O que seu negócio faz</label>
+      <span class="h">Em poucas palavras, como você explicaria para uma cliente nova.</span>
+      <textarea id="descricao" maxlength="400" style="min-height:80px"></textarea>
+    </div>
+
+    <div class="sub">Conexões</div>
+    <div class="two">
+      <div class="field"><label for="ofereco">Ofereço</label><span class="h">O que você pode fazer por outras mulheres e negócios.</span><input id="ofereco" maxlength="200"></div>
+      <div class="field"><label for="preciso">Procuro</label><span class="h">Parcerias, serviços ou clientes. Aparece na área Conexões.</span><input id="preciso" maxlength="200"></div>
+    </div>
+
+    <div class="sub">Mais detalhes</div>
+    <div class="two">
+      <div class="field"><label for="cidade">Cidade ou bairro</label><input id="cidade" maxlength="60" placeholder="Ex.: Maresias"></div>
+      <div class="field"><label for="site">Site</label><input id="site" maxlength="200" inputmode="url" placeholder="www.seunegocio.com.br"></div>
+    </div>
+    <div class="field">
+      <span class="l">Você está como</span>
+      <div class="chips" role="radiogroup">
+        <label class="chip"><input type="radio" name="tipo" id="t1" value="participante" checked><span>Participante</span></label>
+        <label class="chip"><input type="radio" name="tipo" id="t2" value="patrocinadora"><span>Patrocinadora</span></label>
+        <label class="chip"><input type="radio" name="tipo" id="t3" value="parceira"><span>Parceira</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="email">Seu e-mail</label>
+      <span class="h">Não aparece na vitrine. Usamos só para falar sobre o seu perfil.</span>
+      <input id="email" type="email" maxlength="120" required autocomplete="email">
+    </div>
+
+    <div style="position:absolute;left:-9999px" aria-hidden="true"><label for="empresa_site">Não preencha</label><input id="empresa_site" tabindex="-1" autocomplete="off"></div>
+
+    <label class="check"><input type="checkbox" id="consentimento" required><span>Autorizo o Business Wave a publicar estas informações na Vitrine BW (exceto o e-mail) e a me contatar sobre elas, conforme a LGPD. Posso pedir a remoção quando quiser.</span></label>
+
+    <div class="msg err" id="err" hidden></div>
+    <div><button class="btn" id="send" type="submit" style="width:100%;max-width:320px">Entrar na vitrine</button></div>
+  </form>
+
+  <div id="done" hidden style="max-width:640px;display:grid;gap:16px">
+    <div class="msg ok">Cadastro recebido.</div>
+    <h2 style="font-style:italic;font-size:40px;line-height:1.05">Obrigada! Seu negócio entra na vitrine assim que a equipe aprovar.</h2>
+    <p style="color:var(--muted);margin:0">No dia do evento a aprovação sai em poucos minutos. Este é o link do seu perfil, para mandar para quem você conhecer:</p>
+    <div class="share">
+      <code id="meuLink"></code>
+      <div class="acts">
+        <button class="btn sm" id="copiar" type="button">Copiar link</button>
+        <a class="btn sm ghost" id="enviarWa" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
+      </div>
+      <span class="meta" id="copiado" hidden>Link copiado.</span>
+    </div>
+    <div class="acts"><a class="btn ghost" href="./">Ver a vitrine</a><a class="btn ghost" href="cadastro.html">Cadastrar outro negócio</a></div>
+  </div>
+</main>
+
+<script src="assets/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/bw.js"></script>
+<script>
+(function () {
+  const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos } = BW;
+  const $ = s => document.querySelector(s);
+  SEGMENTOS.forEach(s => $("#segmento").insertAdjacentHTML("beforeend", `<option>${esc(s)}</option>`));
+
+  let logoBlob = null;
+  async function reduzir(file) {
+    const img = await createImageBitmap(file);
+    const k = Math.min(1, 600 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
+  }
+  $("#logo").addEventListener("change", async e => {
+    const f = e.target.files[0]; logoBlob = null; if (!f) return;
+    try { logoBlob = await reduzir(f); $("#logoPrev").outerHTML = `<img class="logo" id="logoPrev" src="${URL.createObjectURL(logoBlob)}" alt="">`; }
+    catch (_) { erro("Não consegui ler essa imagem. Tente um JPG ou PNG."); }
+  });
+
+  function erro(t) { const e = $("#err"); e.textContent = t; e.hidden = !t; if (t) e.scrollIntoView({ block: "center", behavior: "smooth" }); }
+
+  $("#f").addEventListener("submit", async e => {
+    e.preventDefault(); erro("");
+    if ($("#empresa_site").value) return;
+    const v = id => $("#" + id).value.trim();
+    const faltando = [["responsavel","seu nome"],["nome_negocio","o nome do negócio"],["whatsapp","o WhatsApp"],["segmento","o segmento"],["email","seu e-mail"]].filter(([id]) => !v(id));
+    if (faltando.length) return erro("Falta preencher " + faltando.map(x => x[1]).join(", ") + ".");
+    if (soDigitos(v("whatsapp")).length < 10) return erro("Confira o WhatsApp: coloque o DDD e o número.");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) return erro("Confira o e-mail: parece incompleto.");
+    if (!$("#consentimento").checked) return erro("Para publicar, precisamos da sua autorização logo acima do botão.");
+
+    const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando…";
+    const id = crypto.randomUUID();
+    try {
+      let logo_url = null;
+      if (logoBlob && !DEMO) {
+        const path = `${id}.jpg`;
+        const up = await sb.storage.from("bw-logos").upload(path, logoBlob, { contentType: "image/jpeg", upsert: false });
+        if (up.error) throw up.error;
+        logo_url = sb.storage.from("bw-logos").getPublicUrl(path).data.publicUrl;
+      }
+      const row = {
+        id, tipo: document.querySelector("input[name=tipo]:checked").value,
+        nome_negocio: v("nome_negocio"), responsavel: v("responsavel"), segmento: v("segmento"),
+        cidade: v("cidade") || null, descricao: v("descricao") || null,
+        instagram: ig(v("instagram")) || null, whatsapp: soDigitos(v("whatsapp")), site: v("site") || null,
+        logo_url, oferta_bw: v("oferta_bw") || null, ofereco: v("ofereco") || null, preciso: v("preciso") || null,
+        email: v("email").toLowerCase(), consentimento: true
+      };
+      if (!DEMO) { const { error } = await sb.from("bw_perfis").insert(row); if (error) throw error; }
+
+      const link = (C.SITE_URL || location.origin) + "/#perfil-" + id;
+      $("#meuLink").textContent = link;
+      $("#enviarWa").href = "https://wa.me/?text=" + encodeURIComponent(`Oi! Este é o meu negócio na Vitrine do Business Wave: ${row.nome_negocio}. ${link}`);
+      $("#copiar").onclick = async () => {
+        try { await navigator.clipboard.writeText(link); $("#copiado").hidden = false; }
+        catch (_) { const r = document.createRange(); r.selectNodeContents($("#meuLink")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+      };
+      $("#f").hidden = true; $("#intro").hidden = true; $("#done").hidden = false; window.scrollTo({ top: 0 });
+    } catch (err) {
+      console.error(err);
+      erro("Não conseguimos enviar agora. Confira a internet e tente de novo; se continuar, chame a organização no Instagram @businesswavelitoral.");
+      btn.disabled = false; btn.textContent = "Entrar na vitrine";
+    }
+  });
+})();
+</script>
+</body>
+</html>
