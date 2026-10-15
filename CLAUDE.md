@@ -19,9 +19,9 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 
 ## Páginas
 - `index.html` vitrine pública: filtros (todos, com oferta, participantes, patrocinadoras e parceiras), busca, segmento, perfil em modal (`#perfil-<id>`), seção Conexões ("Procuro" + botão "Posso ajudar" no WhatsApp).
-- `cadastro.html` cadastro da participante (obrigatórios: nome, negócio, WhatsApp, segmento, e-mail e consentimento LGPD). Gera o `id` no cliente e mostra o link do perfil no fim.
-- `admin.html` painel da organização (login Supabase Auth + tabela `bw_admins`): aprovar, aprovar todos, ocultar, destacar, **editar** (todos os campos e foto), WhatsApp, baixar CSV, atualização a cada 30 s.
-- `painel.html` **painel da participante** por link pessoal `painel.html#<token_edicao>`: status, link do perfil para compartilhar, edição dos próprios dados e da foto (via RPC). Feito e no repositório, **ainda sem link para ele em nenhuma página** (ver Próximos passos).
+- `cadastro.html` cadastro da participante (obrigatórios: nome, negócio, WhatsApp, segmento, e-mail e consentimento LGPD). Gera o `id` e o `token_edicao` no cliente e, no fim, mostra o link do painel pessoal (primeiro, com "Mandar para o meu WhatsApp", "Copiar" e "Abrir meu painel") e o link do perfil para compartilhar.
+- `admin.html` painel da organização (login Supabase Auth + tabela `bw_admins`): aprovar, aprovar todos, ocultar, destacar, **editar** (todos os campos e foto), WhatsApp, **enviar link do painel** (WhatsApp para a participante), baixar CSV, atualização a cada 30 s. O CSV não leva o token, de propósito.
+- `painel.html` **painel da participante** por link pessoal `painel.html#<token_edicao>`: status, link do perfil para compartilhar, edição dos próprios dados e da foto (via RPC). O painel vem primeiro na tela de sucesso porque ele já contém o link do perfil: quem guarda só ele não perde nada.
 - `qr.html` tela para o painel de LED e mesas, com QR de cadastro e da vitrine (`assets/qr-*.svg`, apontando para bw.okgo.dev.br).
 
 ## Banco (ver `docs/`)
@@ -44,10 +44,6 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 - Ao mudar CSS/JS, trocar o `?v=` nos links das páginas para furar o cache dos navegadores.
 
 ## Próximos passos
-1. **Ligar o painel da participante** (pedido para antes do evento de 16/10):
-   - `cadastro.html`: gerar `token_edicao = crypto.randomUUID()` no cliente, enviar no insert e, na tela de sucesso, mostrar o link `https://bw.okgo.dev.br/painel.html#<token>` com botões "Mandar para o meu WhatsApp" (wa.me para o número dela), "Copiar" e "Abrir meu painel", com aviso de que é pessoal.
-   - `admin.html`: botão "Enviar link do painel" por cadastro (WhatsApp para a participante com o link; `token_edicao` vem no `select *` do admin).
-   - Os cadastros que já existiam ganharam token automático (default da coluna).
-2. Segunda etapa: login de participante com **e-mail e senha** (Supabase Auth). Exige desligar "Confirm email" no Supabase; "esqueci a senha" depende de configurar SMTP próprio (o SMTP padrão do Supabase só envia para a equipe do projeto).
-3. Ideias para o evento e depois: modo telão (perfis e ofertas passando no LED, com QR), botão "Salvar contato" (vCard), "Minhas conexões" (favoritos no celular), contador ao vivo, faixa das patrocinadoras, relatório de cliques por patrocinadora.
-4. Pendências com a organização: pasta oficial da marca (fontes e cores), domínio definitivo (vitrine.businesswave.com.br), confirmar horário de encerramento (22h ou 22h30).
+1. Segunda etapa: login de participante com **e-mail e senha** (Supabase Auth). Exige desligar "Confirm email" no Supabase; "esqueci a senha" depende de configurar SMTP próprio (o SMTP padrão do Supabase só envia para a equipe do projeto).
+2. Ideias para o evento e depois: modo telão (perfis e ofertas passando no LED, com QR), botão "Salvar contato" (vCard), "Minhas conexões" (favoritos no celular), contador ao vivo, faixa das patrocinadoras, relatório de cliques por patrocinadora.
+3. Pendências com a organização: pasta oficial da marca (fontes e cores), domínio definitivo (vitrine.businesswave.com.br), confirmar horário de encerramento (22h ou 22h30).

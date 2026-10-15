@@ -92,14 +92,14 @@
 <script src="assets/bw.js?v=20261015b"></script>
 <script>
 (async function () {
-  const { sb, DEMO, esc, logoHTML, waLink } = BW;
+  const { sb, DEMO, C, esc, logoHTML, waLink } = BW;
   const $ = s => document.querySelector(s);
   let perfis = [], filtro = "pendente", confirmando = false;
   const TIPO = { participante: "Participante", patrocinadora: "Patrocinadora", parceira: "Parceira" };
 
   async function carregar() {
     if (DEMO) {
-      if (!perfis.length) perfis = (await BW.listarVitrine()).map((p, i) => ({ ...p, status: i < 2 ? "pendente" : "aprovado", email: "exemplo@email.com", created_at: new Date().toISOString() }));
+      if (!perfis.length) perfis = (await BW.listarVitrine()).map((p, i) => ({ ...p, status: i < 2 ? "pendente" : "aprovado", email: "exemplo@email.com", token_edicao: crypto.randomUUID(), created_at: new Date().toISOString() }));
     } else {
       const a = await sb.from("bw_perfis").select("*").order("created_at", { ascending: false });
       if (a.error) throw a.error; perfis = a.data;
@@ -133,6 +133,7 @@
           ${p.status !== "recusado" ? `<button class="btn sm ghost" data-a="ocultar">Ocultar</button>` : ""}
           ${p.status === "aprovado" ? `<button class="btn sm ghost" data-a="destaque">${p.destaque ? "Tirar destaque" : "Destacar"}</button>` : ""}
           ${p.whatsapp ? `<a class="btn sm ghost" href="${esc(waLink(p.whatsapp, `Oi, ${p.responsavel}! Aqui é do Business Wave, sobre o seu perfil na Vitrine BW.`))}" target="_blank" rel="noopener">WhatsApp</a>` : ""}
+          ${p.whatsapp && p.token_edicao ? `<a class="btn sm ghost" href="${esc(waLink(p.whatsapp, `Oi, ${p.responsavel}! Aqui é do Business Wave. Este é o seu painel na Vitrine BW: por ele você edita seu perfil, troca a foto e vê se já está na vitrine. O link é pessoal, não compartilhe. ${(C.SITE_URL || location.origin)}/painel.html#${p.token_edicao}`))}" target="_blank" rel="noopener">Enviar link do painel</a>` : ""}
         </div>
       </div>`).join("");
     const vz = $("#vazio"); vz.hidden = l.length > 0;

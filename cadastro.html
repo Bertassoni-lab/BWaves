@@ -24,7 +24,7 @@
   <div id="intro" style="display:grid;gap:10px;margin-bottom:26px;max-width:640px">
     <div class="eyebrow">Business Wave · 5ª edição</div>
     <h1 style="font-style:italic;font-size:clamp(38px,8vw,58px);line-height:1">Coloque seu negócio na vitrine</h1>
-    <p style="color:var(--muted);margin:0">Leva 2 minutos. Só os quatro primeiros campos são obrigatórios; o resto você completa como quiser.</p>
+    <p style="color:var(--muted);margin:0">Leva 2 minutos. Só os quatro primeiros campos e o seu e-mail são obrigatórios; o resto você completa como quiser.</p>
   </div>
 
   <form class="form" id="f" novalidate>
@@ -93,7 +93,20 @@
   <div id="done" hidden style="max-width:640px;display:grid;gap:16px">
     <div class="msg ok">Cadastro recebido.</div>
     <h2 style="font-style:italic;font-size:40px;line-height:1.05">Obrigada! Seu negócio entra na vitrine assim que a equipe aprovar.</h2>
-    <p style="color:var(--muted);margin:0">No dia do evento a aprovação sai em poucos minutos. Este é o link do seu perfil, para mandar para quem você conhecer:</p>
+    <p style="color:var(--muted);margin:0">No dia do evento a aprovação sai em poucos minutos.</p>
+    <div class="share">
+      <b>Seu painel pessoal</b>
+      <span class="meta">Por ele você edita seu perfil, troca a foto e vê se já está na vitrine. Mande para o seu WhatsApp agora para não perder.</span>
+      <code id="linkPainel"></code>
+      <div class="acts">
+        <a class="btn sm" id="painelWa" href="#" target="_blank" rel="noopener">Mandar para o meu WhatsApp</a>
+        <button class="btn sm ghost" id="copiarPainel" type="button">Copiar</button>
+        <a class="btn sm ghost" id="abrirPainel" href="#">Abrir meu painel</a>
+      </div>
+      <span class="meta" id="copiadoPainel" hidden>Link copiado.</span>
+      <span class="meta">Este link é pessoal: quem tiver ele consegue editar seu perfil. Não compartilhe.</span>
+    </div>
+    <p style="color:var(--muted);margin:0">E este é o link do seu perfil, para mandar para quem você conhecer:</p>
     <div class="share">
       <code id="meuLink"></code>
       <div class="acts">
@@ -111,7 +124,7 @@
 <script src="assets/bw.js?v=20261015b"></script>
 <script>
 (function () {
-  const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos } = BW;
+  const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos, waLink } = BW;
   const $ = s => document.querySelector(s);
   SEGMENTOS.forEach(s => $("#segmento").insertAdjacentHTML("beforeend", `<option>${esc(s)}</option>`));
 
@@ -142,7 +155,7 @@
     if (!$("#consentimento").checked) return erro("Para publicar, precisamos da sua autorização logo acima do botão.");
 
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando…";
-    const id = crypto.randomUUID();
+    const id = crypto.randomUUID(), token_edicao = crypto.randomUUID();
     try {
       let logo_url = null;
       if (logoBlob && !DEMO) {
@@ -157,17 +170,22 @@
         cidade: v("cidade") || null, descricao: v("descricao") || null,
         instagram: ig(v("instagram")) || null, whatsapp: soDigitos(v("whatsapp")), site: v("site") || null,
         logo_url, oferta_bw: v("oferta_bw") || null, ofereco: v("ofereco") || null, preciso: v("preciso") || null,
-        email: v("email").toLowerCase(), consentimento: true
+        email: v("email").toLowerCase(), consentimento: true, token_edicao
       };
       if (!DEMO) { const { error } = await sb.from("bw_perfis").insert(row); if (error) throw error; }
 
-      const link = (C.SITE_URL || location.origin) + "/#perfil-" + id;
+      const base = C.SITE_URL || location.origin;
+      const link = base + "/#perfil-" + id, linkPainel = base + "/painel.html#" + token_edicao;
+      const copiar = (btn, code, ok, txt) => btn.onclick = async () => {
+        try { await navigator.clipboard.writeText(txt); ok.hidden = false; }
+        catch (_) { const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+      };
+      $("#linkPainel").textContent = linkPainel; $("#abrirPainel").href = linkPainel;
+      $("#painelWa").href = waLink(row.whatsapp, `Meu painel na Vitrine BW (${row.nome_negocio}): por ele edito meu perfil e vejo se já está na vitrine. É pessoal, não compartilhar. ${linkPainel}`);
+      copiar($("#copiarPainel"), $("#linkPainel"), $("#copiadoPainel"), linkPainel);
       $("#meuLink").textContent = link;
       $("#enviarWa").href = "https://wa.me/?text=" + encodeURIComponent(`Oi! Este é o meu negócio na Vitrine do Business Wave: ${row.nome_negocio}. ${link}`);
-      $("#copiar").onclick = async () => {
-        try { await navigator.clipboard.writeText(link); $("#copiado").hidden = false; }
-        catch (_) { const r = document.createRange(); r.selectNodeContents($("#meuLink")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
-      };
+      copiar($("#copiar"), $("#meuLink"), $("#copiado"), link);
       $("#f").hidden = true; $("#intro").hidden = true; $("#done").hidden = false; window.scrollTo({ top: 0 });
     } catch (err) {
       console.error(err);
