@@ -107,7 +107,7 @@ footer{padding-block:28px 40px;color:var(--muted);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
 
 /* modal do perfil */
-dialog{border:1px solid var(--line-2);border-radius:18px;background:var(--surface);color:var(--fg);padding:0;width:min(560px,calc(100% - 24px));max-height:calc(100% - 24px)}
+dialog{overflow:auto;border:1px solid var(--line-2);border-radius:18px;background:var(--surface);color:var(--fg);padding:0;width:min(560px,calc(100% - 24px));max-height:calc(100% - 24px)}
 dialog::backdrop{background:rgba(0,0,0,.7)}
 .dlg{display:grid;gap:16px;padding:22px}
 .dlg-head{display:flex;gap:14px;align-items:center}

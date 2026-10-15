@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=20261015b">
+<link rel="stylesheet" href="assets/style.css?v=20261015c">
 </head>
 <body>
 <header class="top">
@@ -49,6 +49,43 @@
     <p class="meta" id="atual"></p>
   </section>
 </main>
+
+<dialog id="ed" aria-labelledby="edT">
+  <form class="dlg" id="ef" novalidate>
+    <button class="x" type="button" aria-label="Fechar" data-close>×</button>
+    <h2 id="edT" style="font-size:30px">Editar perfil</h2>
+    <div class="field">
+      <span class="l">Logo ou foto</span>
+      <div class="preview"><span id="eLogoBox"></span><input id="eLogo" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Trocar logo ou foto"></div>
+      <button class="btn sm ghost" type="button" id="eLogoTirar" style="justify-self:start">Remover foto</button>
+    </div>
+    <div class="two">
+      <div class="field"><label for="e_responsavel">Nome</label><input id="e_responsavel" maxlength="80"></div>
+      <div class="field"><label for="e_nome_negocio">Negócio</label><input id="e_nome_negocio" maxlength="80"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="e_whatsapp">WhatsApp</label><input id="e_whatsapp" maxlength="20" inputmode="tel"></div>
+      <div class="field"><label for="e_segmento">Segmento</label><select id="e_segmento"></select></div>
+    </div>
+    <div class="field"><label for="e_oferta_bw">Oferta exclusiva BW</label><input id="e_oferta_bw" maxlength="160"></div>
+    <div class="two">
+      <div class="field"><label for="e_instagram">Instagram</label><input id="e_instagram" maxlength="60"></div>
+      <div class="field"><label for="e_cidade">Cidade</label><input id="e_cidade" maxlength="60"></div>
+    </div>
+    <div class="field"><label for="e_descricao">O que o negócio faz</label><textarea id="e_descricao" maxlength="400" style="min-height:70px"></textarea></div>
+    <div class="two">
+      <div class="field"><label for="e_ofereco">Ofereço</label><input id="e_ofereco" maxlength="200"></div>
+      <div class="field"><label for="e_preciso">Procuro</label><input id="e_preciso" maxlength="200"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="e_site">Site</label><input id="e_site" maxlength="200"></div>
+      <div class="field"><label for="e_email">E-mail</label><input id="e_email" type="email" maxlength="120"></div>
+    </div>
+    <div class="field"><label for="e_tipo">Tipo</label><select id="e_tipo"><option value="participante">Participante</option><option value="patrocinadora">Patrocinadora</option><option value="parceira">Parceira</option></select></div>
+    <div class="msg err" id="eErr" hidden></div>
+    <div class="acts"><button class="btn" type="submit" id="eSave">Salvar alterações</button><button class="btn ghost" type="button" data-close>Cancelar</button></div>
+  </form>
+</dialog>
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
@@ -91,6 +128,7 @@
           ${p.preciso ? `<div class="meta">Procura: ${esc(p.preciso)}</div>` : ""}
         </div>
         <div class="acts">
+          <button class="btn sm ghost" data-a="editar">Editar</button>
           ${p.status !== "aprovado" ? `<button class="btn sm" data-a="aprovar">${p.status === "recusado" ? "Voltar para a vitrine" : "Aprovar"}</button>` : ""}
           ${p.status !== "recusado" ? `<button class="btn sm ghost" data-a="ocultar">Ocultar</button>` : ""}
           ${p.status === "aprovado" ? `<button class="btn sm ghost" data-a="destaque">${p.destaque ? "Tirar destaque" : "Destacar"}</button>` : ""}
@@ -114,12 +152,66 @@
     if (b.dataset.a === "aprovar") atualizar([id], { status: "aprovado" });
     if (b.dataset.a === "ocultar") atualizar([id], { status: "recusado", destaque: false });
     if (b.dataset.a === "destaque") atualizar([id], { destaque: !p.destaque });
+    if (b.dataset.a === "editar") abrirEditor(p);
   });
   $("#aprovarTodos").addEventListener("click", async () => {
     const ids = perfis.filter(p => p.status === "pendente").map(p => String(p.id));
     const b = $("#aprovarTodos");
     if (!confirmando) { confirmando = true; b.textContent = `Confirmar: aprovar ${ids.length}`; setTimeout(() => { confirmando = false; render(); }, 5000); return; }
     confirmando = false; await atualizar(ids, { status: "aprovado" });
+  });
+
+  // edição de perfil
+  const CAMPOS = ["responsavel","nome_negocio","whatsapp","segmento","oferta_bw","instagram","cidade","descricao","ofereco","preciso","site","email","tipo"];
+  BW.SEGMENTOS.forEach(s => $("#e_segmento").insertAdjacentHTML("beforeend", `<option>${esc(s)}</option>`));
+  let editando = null, novoLogo = null, tirarLogo = false;
+  function mostrarLogo(src, nome) {
+    $("#eLogoBox").innerHTML = src ? `<img class="logo" src="${esc(src)}" alt="">` : `<span class="logo">${esc(BW.iniciais(nome))}</span>`;
+  }
+  function abrirEditor(p) {
+    editando = p; novoLogo = null; tirarLogo = false; $("#eErr").hidden = true; $("#eLogo").value = "";
+    CAMPOS.forEach(c => { const el = $("#e_" + c); el.value = p[c] ?? ""; });
+    if (p.segmento && ![...$("#e_segmento").options].some(o => o.value === p.segmento)) $("#e_segmento").insertAdjacentHTML("beforeend", `<option>${esc(p.segmento)}</option>`), $("#e_segmento").value = p.segmento;
+    mostrarLogo(p.logo_url, p.nome_negocio);
+    $("#ed").showModal();
+  }
+  async function reduzir(file) {
+    const img = await createImageBitmap(file);
+    const k = Math.min(1, 600 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
+  }
+  $("#eLogo").addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try { novoLogo = await reduzir(f); tirarLogo = false; mostrarLogo(URL.createObjectURL(novoLogo), ""); }
+    catch (_) { const er = $("#eErr"); er.textContent = "Não consegui ler essa imagem. Tente um JPG ou PNG."; er.hidden = false; }
+  });
+  $("#eLogoTirar").addEventListener("click", () => { novoLogo = null; tirarLogo = true; $("#eLogo").value = ""; mostrarLogo("", $("#e_nome_negocio").value); });
+  $("#ed").addEventListener("click", e => { if (e.target.closest("[data-close]") || e.target === e.currentTarget) e.currentTarget.close(); });
+  $("#ef").addEventListener("submit", async e => {
+    e.preventDefault();
+    const er = $("#eErr"); er.hidden = true;
+    const v = c => $("#e_" + c).value.trim();
+    if (!v("responsavel") || !v("nome_negocio") || !v("segmento")) { er.textContent = "Nome, negócio e segmento não podem ficar vazios."; er.hidden = false; return; }
+    const patch = {};
+    CAMPOS.forEach(c => { patch[c] = v(c) || null; });
+    patch.whatsapp = BW.soDigitos(v("whatsapp")) || null;
+    patch.instagram = BW.ig(v("instagram")) || null;
+    if (!patch.email) patch.email = editando.email; // e-mail é obrigatório no banco
+    const btn = $("#eSave"); btn.disabled = true; btn.textContent = "Salvando…";
+    try {
+      if (novoLogo && !DEMO) {
+        const path = `${editando.id}-${Date.now()}.jpg`;
+        const up = await sb.storage.from("bw-logos").upload(path, novoLogo, { contentType: "image/jpeg", upsert: false });
+        if (up.error) throw up.error;
+        patch.logo_url = sb.storage.from("bw-logos").getPublicUrl(path).data.publicUrl;
+      } else if (novoLogo && DEMO) patch.logo_url = "";
+      if (tirarLogo) patch.logo_url = null;
+      if (!DEMO) { const { error } = await sb.from("bw_perfis").update(patch).eq("id", editando.id); if (error) throw error; }
+      Object.assign(editando, patch); render(); $("#ed").close();
+    } catch (err) { console.error(err); er.textContent = "Não salvou: " + (err.message || err) + ". Tente de novo."; er.hidden = false; }
+    finally { btn.disabled = false; btn.textContent = "Salvar alterações"; }
   });
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", String(x === t))); filtro = t.dataset.s; render();
@@ -137,7 +229,7 @@
   async function entrar() {
     $("#login").hidden = true; $("#app").hidden = false; $("#sair").hidden = DEMO;
     try { await carregar(); } catch (e) { avisar(e); }
-    setInterval(() => { if (!document.hidden && !confirmando) carregar().catch(() => {}); }, 30000);
+    setInterval(() => { if (!document.hidden && !confirmando && !$("#ed").open) carregar().catch(() => {}); }, 30000);
   }
   if (DEMO) return entrar();
   const { data: { session } } = await sb.auth.getSession();
