@@ -187,5 +187,5 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 /* logo da marca */
 .brand-logo{height:30px;width:auto}
 .brand b{border-left:1px solid var(--line-2);padding-left:10px}
-.hero-logo{width:min(78vw,340px);height:auto}
+.hero-logo{width:min(46vw,190px);height:auto;margin-bottom:-6px}
 @media (max-width:440px){ .brand b{display:none} }
