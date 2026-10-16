@@ -15,6 +15,6 @@ window.BW_CONFIG = {
     detalhe: "Roteiro As 3 Ilhas da Costa Sul: cerca de 3 horas, saindo da Praia de Boiçucanga. Saídas às 9h, 12h e 15h.",
     validade: "16/02/2027",
     total: 20,
-    whatsapp: ""   // WhatsApp da Maresias Tour para agendar, com DDD
+    whatsapp: "5512996509051"   // WhatsApp da Maresias Tour para agendar
   }
 };

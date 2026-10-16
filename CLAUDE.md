@@ -37,6 +37,8 @@ Passeio de lancha compartilhada (As 3 Ilhas da Costa Sul) para as **20 primeiras
 - O resgate é **uma função só no banco** (`bw_voucher(token, resgatar)`): confere a lista, trava o perfil e pega o próximo código livre com `skip locked`. Duas pessoas tocando juntas nunca pegam o mesmo código, e quem toca duas vezes recebe o mesmo.
 - **Nenhum dado da participante vai para a Maresias Tour**: é ela quem leva o código ao agendar, pelo WhatsApp deles. O consentimento do cadastro cobre a vitrine, não o repasse a patrocinadora.
 - O painel esconde o cartão se a função não existir no banco: a tela pode ir ao ar antes do banco.
+- **Os 20 cupons já existem na Maresias Tour** (códigos `BW26-xxxx`, criados em 16/10/2026). Atenção: na rota direta `POST /api/cupons`, o `valor` de cupom fixo é em **centavos** (`20000` = R$ 200), enquanto `valorMinimoReais` é em reais; a ferramenta simples `criar_cupom` recebe reais. O primeiro saiu com R$ 2,00 e foi corrigido. `POST /api/cupons/validar` confere um cupom como no checkout sem gastar o uso.
+- Agendamento pelo WhatsApp da Maresias Tour (`VOUCHER.whatsapp` em `assets/config.js`).
 - SQL em `docs/voucher-maresiastur.sql`.
 
 ## Banco (ver `docs/`)
