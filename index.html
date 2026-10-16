@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=20261016c">
+<link rel="stylesheet" href="assets/style.css?v=20261016d">
 </head>
 <body>
 <header class="top">
@@ -205,7 +205,7 @@
       <div class="dlg-head">${logoHTML(p)}<div><div class="eyebrow">${esc(TIPO_LABEL[p.tipo])} · ${esc(p.segmento)}</div><h2 id="dName">${esc(p.nome_negocio)}</h2><div class="meta">${esc(p.responsavel)}${p.cidade ? " · " + esc(p.cidade) : ""}</div></div></div>
       ${p.oferta_bw ? `<div class="offer"><b>Oferta exclusiva BW</b><p>${esc(p.oferta_bw)}</p>${waOferta ? `<a class="btn sm" style="margin-top:10px" href="${esc(waOferta)}" target="_blank" rel="noopener">Quero essa oferta</a>` : ""}</div>` : ""}
       ${p.descricao ? `<p style="margin:0">${esc(p.descricao)}</p>` : ""}
-      ${(p.ofereco || p.preciso) ? `<div class="kv">${p.ofereco ? `<div><small>Ofereço</small>${esc(p.ofereco)}</div>` : ""}${p.preciso ? `<div><small>Procuro</small>${esc(p.preciso)}</div>` : ""}</div>` : ""}
+      ${p.ofereco ? `<div class="kv" style="grid-template-columns:1fr"><div><small>Ofereço</small>${esc(p.ofereco)}</div></div>` : ""}
       <div class="acts">
         ${wa ? `<a class="btn ${p.oferta_bw ? "ghost" : ""}" href="${esc(wa)}" target="_blank" rel="noopener">Chamar no WhatsApp</a>` : ""}
         ${insta ? `<a class="btn ghost" href="https://instagram.com/${esc(insta)}" target="_blank" rel="noopener">@${esc(insta)}</a>` : ""}
