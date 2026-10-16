@@ -189,3 +189,23 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .brand b{border-left:1px solid var(--line-2);padding-left:10px}
 .hero-logo{width:min(46vw,190px);height:auto;margin-bottom:-6px}
 @media (max-width:440px){ .brand b{display:none} }
+
+/* fotos do evento: no celular a foto do grupo vem inteira, sem corte nos lados */
+.galeria{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);margin:0}
+.galeria figure{margin:0;overflow:hidden;border-radius:var(--r);background:var(--surface)}
+.galeria img{display:block;width:100%;height:100%;object-fit:cover}
+.galeria .g3 img,.galeria .g4 img{object-position:50% 25%}
+@media (max-width:759px){
+  .galeria .g1,.galeria .g2{grid-column:span 2}
+  .galeria .g1{aspect-ratio:16/9}
+  .galeria .g2{aspect-ratio:3/2}
+  .galeria .g3,.galeria .g4{aspect-ratio:1}
+}
+@media (min-width:760px){
+  .galeria{grid-template-columns:repeat(6,1fr);grid-auto-rows:160px}
+  .galeria .g1{grid-column:span 4;grid-row:span 2}
+  .galeria .g1 img{object-position:50% 75%}
+  .galeria .g2{grid-column:span 2;grid-row:span 2}
+  .galeria .g2 img{object-position:62% 50%}
+  .galeria .g3,.galeria .g4{grid-column:span 3;grid-row:span 2}
+}
