@@ -187,38 +187,39 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 /* logo da marca */
 .brand-logo{height:30px;width:auto}
 .brand b{border-left:1px solid var(--line-2);padding-left:10px}
-.hero-logo{width:min(46vw,190px);height:auto;margin-bottom:-6px}
 @media (max-width:440px){ .brand b{display:none} }
 
-/* foto do topo: só no computador, onde a coluna da direita ficava vazia.
-   No celular ela some (e, por ser lazy, nem é baixada). */
-.hero-foto{display:none;margin:0}
+/* topo: a foto do grupo atravessa a tela e a borda de baixo e' uma onda.
+   No celular ela vem logo abaixo do titulo; no computador, antes dos textos.
+   E' um <figure> so, dentro do grid do texto: a margem negativa calculada a
+   faz sair da coluna e ocupar a largura da tela (ate 1440 px) nos dois casos.
+   A mascara e o fio dourado usam a MESMA curva no mesmo viewBox esticado,
+   por isso o fio sempre cai em cima da borda, em qualquer largura. */
+.hero{padding-bottom:36px;overflow-x:clip}
+.hero .wrap.hero-texto{gap:22px}
+.hero-lado{display:grid;gap:18px}
+.onda{margin-block:4px 6px;margin-inline:calc((100% - min(100vw,1440px)) / 2)}
+.onda-foto{position:relative}
+.onda img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:50% 60%;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 600' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H1440 V530 C1200 590 960 590 720 545 S240 490 0 560 Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 600' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H1440 V530 C1200 590 960 590 720 545 S240 490 0 560 Z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.onda-fio{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.onda-fio path{fill:none;stroke:var(--gold);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.onda-fio .eco{stroke:var(--gold-2);opacity:.45;stroke-width:1}
+.hero .how{margin-top:22px}
 @media (min-width:900px){
-  .hero .wrap{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);column-gap:48px;
-    grid-template-areas:"logo foto" "eyebrow foto" "titulo foto" "lede foto" "ctas foto" "how how"}
-  .hero-logo{grid-area:logo} .hero .eyebrow{grid-area:eyebrow} .hero h1{grid-area:titulo}
-  .hero p.lede{grid-area:lede} .hero .ctas{grid-area:ctas} .hero .how{grid-area:how}
-  .hero-foto{display:block;grid-area:foto;position:relative;min-height:360px;border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--line)}
-  /* absoluta para a foto acompanhar a altura do texto, sem esticar as linhas do grid */
-  .hero-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:55% 30%}
+  .hero{padding-top:0}
+  .hero .wrap.hero-texto{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:56px;align-items:end;
+    grid-template-areas:"foto foto" "eyebrow eyebrow" "titulo lado"}
+  .onda{grid-area:foto;margin-block:0 18px}
+  .hero .eyebrow{grid-area:eyebrow} .hero h1{grid-area:titulo;max-width:13ch} .hero-lado{grid-area:lado}
+  .onda img{aspect-ratio:2.5/1}
 }
 
-/* fotos do evento: no celular a foto do grupo vem inteira, sem corte nos lados */
-.galeria{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);margin:0}
-.galeria figure{margin:0;overflow:hidden;border-radius:var(--r);background:var(--surface)}
-.galeria img{display:block;width:100%;height:100%;object-fit:cover}
-.galeria .g3 img,.galeria .g4 img{object-position:50% 25%}
-@media (max-width:759px){
-  .galeria .g1,.galeria .g2{grid-column:span 2}
-  .galeria .g1{aspect-ratio:16/9}
-  .galeria .g2{aspect-ratio:3/2}
-  .galeria .g3,.galeria .g4{aspect-ratio:1}
-}
-@media (min-width:760px){
-  .galeria{grid-template-columns:repeat(6,1fr);grid-auto-rows:160px}
-  .galeria .g1{grid-column:span 4;grid-row:span 2}
-  .galeria .g1 img{object-position:50% 75%}
-  .galeria .g2{grid-column:span 2;grid-row:span 2}
-  .galeria .g2 img{object-position:62% 50%}
-  .galeria .g3,.galeria .g4{grid-column:span 3;grid-row:span 2}
-}
+/* galeria do evento: em colunas, com cada foto no formato dela (retrato e paisagem juntos,
+   sem corte). Foto nova e' so mais um <figure>; a .destaque atravessa as colunas. */
+.galeria{columns:2;column-gap:10px}
+@media (min-width:760px){ .galeria{columns:3} }
+.galeria figure{margin:0 0 10px;break-inside:avoid;border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.galeria .destaque{column-span:all}
+.galeria img{display:block;width:100%;height:auto}
