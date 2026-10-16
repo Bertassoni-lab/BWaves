@@ -42,7 +42,14 @@ img{max-width:100%;display:block}
 .eyebrow{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:600}
 h1,h2,h3{font-family:var(--display);font-weight:500;text-wrap:balance;margin:0}
 .hero h1{font-style:italic;font-size:clamp(44px,9vw,84px);line-height:.98;max-width:12ch}
-.hero h1 em{color:var(--gold);font-style:italic}
+.hero h1 em{display:block;color:var(--gold);font-style:italic}
+/* o titulo e' proporcional a largura onde ele mora: a fonte cresce com ela, entao
+   as linhas saem iguais em qualquer tela e ocupam a largura toda ("As mulheres do BW
+   / e seus negocios, / num so lugar."). 0.137 = 96% da largura dividido pela linha
+   mais longa (6,985 em na Cormorant italica). No celular a largura e' a da tela menos
+   o respiro; no computador, a da coluna da esquerda (5/9 do texto, tirado o vao). */
+.hero h1{font-size:clamp(40px,calc((100vw - 36px) * .137),84px);max-width:none;text-wrap:wrap}
+@media (min-width:900px){ .hero h1{font-size:min(84px,calc((min(100vw,1120px) - 92px) * .0761))} }
 .hero p.lede{font-size:18px;color:var(--muted);max-width:56ch;margin:0}
 .hero .ctas{display:flex;flex-wrap:wrap;gap:10px}
 .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
@@ -189,16 +196,16 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .brand b{border-left:1px solid var(--line-2);padding-left:10px}
 @media (max-width:440px){ .brand b{display:none} }
 
-/* topo: a foto do grupo atravessa a tela e a borda de baixo e' uma onda.
-   No celular ela vem logo abaixo do titulo; no computador, antes dos textos.
+/* topo: a foto do grupo abre a pagina, colada no menu, e a borda de baixo e'
+   uma onda que leva ao titulo (sem corte seco, no celular e no computador).
    E' um <figure> so, dentro do grid do texto: a margem negativa calculada a
    faz sair da coluna e ocupar a largura da tela (ate 1440 px) nos dois casos.
    A mascara e o fio dourado usam a MESMA curva no mesmo viewBox esticado,
    por isso o fio sempre cai em cima da borda, em qualquer largura. */
-.hero{padding-bottom:36px;overflow-x:clip}
+.hero{padding-block:0 36px;overflow-x:clip}
 .hero .wrap.hero-texto{gap:22px}
 .hero-lado{display:grid;gap:18px}
-.onda{margin-block:4px 6px;margin-inline:calc((100% - min(100vw,1440px)) / 2)}
+.onda{margin-block:0 6px;margin-inline:calc((100% - min(100vw,1440px)) / 2)}
 .onda-foto{position:relative}
 .onda img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:50% 60%;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 600' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H1440 V530 C1200 590 960 590 720 545 S240 490 0 560 Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
@@ -208,11 +215,10 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .onda-fio .eco{stroke:var(--gold-2);opacity:.45;stroke-width:1}
 .hero .how{margin-top:22px}
 @media (min-width:900px){
-  .hero{padding-top:0}
   .hero .wrap.hero-texto{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:56px;align-items:end;
     grid-template-areas:"foto foto" "eyebrow eyebrow" "titulo lado"}
   .onda{grid-area:foto;margin-block:0 18px}
-  .hero .eyebrow{grid-area:eyebrow} .hero h1{grid-area:titulo;max-width:13ch} .hero-lado{grid-area:lado;align-self:center}
+  .hero .eyebrow{grid-area:eyebrow} .hero h1{grid-area:titulo} .hero-lado{grid-area:lado;align-self:center}
   .onda img{aspect-ratio:2.5/1}
 }
 
