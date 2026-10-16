@@ -28,7 +28,9 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 - `bw_perfis`: perfis. `status` in (`pendente`,`aprovado`,`recusado` = oculto), `destaque`, `email` (privado), `token_edicao` (privado).
   - anon: insere só com `status='pendente'`, `destaque=false`, `consentimento=true`; lê só aprovados e só as colunas públicas (grant por coluna; `email` e `token_edicao` não são legíveis).
   - admin (`bw_is_admin()` = usuário em `bw_admins`): lê, edita e apaga tudo.
-- `bw_admins`: hoje 1 admin, drihollandh@gmail.com.
+- `bw_admins`: hoje 2 admins, drihollandh@gmail.com e vitoriamdfl@gmail.com (Vitória Lemes, criada em 15/10/2026 com senha temporária).
+  - Conta de admin nova: criar o usuário em `auth.users` + `auth.identities` (e-mail já confirmado, senha com `extensions.crypt(..., gen_salt('bf'))`, colunas de token como `''`, nunca nulas) e depois inserir em `bw_admins`. O SMTP padrão não manda convite para fora da equipe do Supabase.
+  - Todo usuário novo do projeto ganha uma linha em `nucleo.usuarios` pelo gatilho `nucleo_criar_usuario` (sistema da OkGo). É só id e nome, sem papel nem permissão; o nome vem de `raw_user_meta_data->>'nome'`.
 - `bw_embaixadoras`: sobra do escopo antigo (ranking). Não usada pelo site.
 - Funções da participante: `bw_meu_perfil(p_token)` e `bw_atualizar_meu_perfil(p_token, p_dados jsonb)` (security definer, só campos permitidos; não mexem em status/destaque).
 - Storage: bucket público `bw-logos` (jpeg/png/webp, 3 MB). Fotos são reduzidas para 600 px no navegador antes do upload.
