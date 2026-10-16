@@ -229,3 +229,9 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .galeria figure{margin:0 0 10px;break-inside:avoid;border-radius:var(--r);overflow:hidden;background:var(--surface)}
 .galeria .destaque{column-span:all}
 .galeria img{display:block;width:100%;height:auto}
+
+/* presente no painel da participante */
+.presente{display:grid;gap:12px;padding:18px;border:1px solid var(--gold);border-radius:var(--r);background:color-mix(in srgb,var(--gold) 8%,transparent)}
+.presente h2{font-size:clamp(26px,5vw,34px);line-height:1.1}
+.presente .cod{display:block;font:600 clamp(26px,7vw,36px)/1.1 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:var(--gold-2);background:var(--surface-2);padding:12px 14px;border-radius:10px;text-align:center;user-select:all}
+.presente .regras{margin:0;padding-left:18px;color:var(--muted);font-size:14px;display:grid;gap:4px}

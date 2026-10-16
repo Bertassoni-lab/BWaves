@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=20261015d">
+<link rel="stylesheet" href="assets/style.css?v=20261016f">
 </head>
 <body>
 <header class="top">
@@ -35,6 +35,14 @@
       <h1 style="font-style:italic;font-size:clamp(36px,7vw,52px);line-height:1" id="tNegocio"></h1>
       <div id="status"></div>
     </div>
+
+    <section class="presente" id="presente" hidden aria-live="polite">
+      <div class="eyebrow">Presente <span id="vDe"></span></div>
+      <h2 id="vPasseio"></h2>
+      <p class="meta" style="margin:0" id="vDetalhe"></p>
+      <div id="vCorpo" style="display:grid;gap:12px"></div>
+      <div class="msg err" id="vErr" hidden></div>
+    </section>
 
     <div class="share">
       <b>Link do seu perfil na vitrine</b>
@@ -92,11 +100,11 @@
 </main>
 
 <script src="assets/supabase.js"></script>
-<script src="assets/config.js?v=20261015d"></script>
+<script src="assets/config.js?v=20261016a"></script>
 <script src="assets/bw.js?v=20261016a"></script>
 <script>
 (async function () {
-  const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos, iniciais } = BW;
+  const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos, iniciais, waLink } = BW;
   const $ = s => document.querySelector(s);
   const CAMPOS = ["responsavel","nome_negocio","whatsapp","segmento","oferta_bw","instagram","cidade","descricao","ofereco","preciso","site","email"];
   const token = (location.hash.slice(1) || new URLSearchParams(location.search).get("t") || "").trim();
@@ -132,6 +140,50 @@
     };
   }
 
+  // Presente Maresias Tour. Quem decide se ela tem direito (lista do evento) e entrega o codigo
+  // e' o banco, de uma vez so: duas participantes tocando juntas nunca pegam o mesmo codigo.
+  // Qualquer erro (por exemplo, a funcao ainda nao existir) so' esconde o cartao.
+  const V = C.VOUCHER;
+  async function voucher(resgatar) {
+    const { data, error } = await sb.rpc("bw_voucher", { p_token: token, p_resgatar: resgatar });
+    if (error) throw error;
+    return data && data[0];
+  }
+  function mostrarVoucher(v) {
+    const box = $("#presente"); $("#vErr").hidden = true;
+    if (!v) { box.hidden = true; return; }
+    $("#vDe").textContent = V.de; $("#vPasseio").textContent = V.passeio; $("#vDetalhe").textContent = V.detalhe;
+    const regras = `<ul class="regras"><li>Válido até ${esc(V.validade)}, uma vez só.</li><li>Precisa de 1 acompanhante pagante na mesma reserva.</li><li>Sujeito a vaga: o passeio compartilhado sai com no mínimo 8 pessoas.</li></ul>`;
+    let html;
+    if (v.situacao === "resgatado") {
+      const wa = V.whatsapp ? waLink(V.whatsapp, `Oi! Sou ${perfil.responsavel}, participante do Business Wave, e quero agendar o ${V.passeio.toLowerCase()} (${V.roteiro}) com o meu voucher ${v.codigo}. Vou com 1 acompanhante.`) : "";
+      html = `<span class="meta">Seu voucher</span><code class="cod">${esc(v.codigo)}</code>${regras}`
+        + (wa ? `<div class="acts"><a class="btn" href="${esc(wa)}" target="_blank" rel="noopener">Agendar pelo WhatsApp</a></div>` : "")
+        + `<span class="meta">O código é seu e vale uma vez só. Ele fica guardado aqui no painel.</span>`;
+    } else if (v.situacao === "disponivel") {
+      html = `<p style="margin:0">As ${V.total} primeiras participantes do evento que resgatarem ganham o passeio. ${v.restantes === 1 ? "Resta 1 voucher." : `Restam ${v.restantes} vouchers.`}</p>${regras}`
+        + `<div class="acts"><button class="btn" type="button" id="resgatar">Resgatar meu voucher</button></div>`;
+    } else if (v.situacao === "esgotado") {
+      html = `<p style="margin:0">Os ${V.total} vouchers já foram resgatados. Obrigada por estar no Business Wave!</p>`;
+    } else {
+      html = `<p class="meta" style="margin:0">Este presente é das participantes da ${esc(C.EVENTO.edicao)} do Business Wave. Não encontramos seu WhatsApp nem seu e-mail na lista do evento: se você esteve lá, fale com a organização.</p>`;
+    }
+    $("#vCorpo").innerHTML = html; box.hidden = false;
+    const b = $("#resgatar");
+    if (b) b.onclick = async () => {
+      b.disabled = true; b.textContent = "Resgatando…";
+      try { mostrarVoucher(await voucher(true)); }
+      catch (e) {
+        console.error(e); b.disabled = false; b.textContent = "Resgatar meu voucher";
+        const er = $("#vErr"); er.textContent = "Não deu para resgatar agora. Confira a internet e tente de novo."; er.hidden = false;
+      }
+    };
+  }
+  async function carregarVoucher() {
+    if (DEMO || !V) return;
+    try { mostrarVoucher(await voucher(false)); } catch (e) { console.warn("voucher indisponível", e); }
+  }
+
   async function carregar() {
     if (DEMO) return { id: "e2", status: "aprovado", ...(await BW.listarVitrine()).find(x => x.id === "e2"), email: "exemplo@email.com" };
     const { data, error } = await sb.rpc("bw_meu_perfil", { p_token: token });
@@ -145,6 +197,7 @@
     $("#carregando").hidden = true;
     if (!p) { $("#semLink").hidden = false; return; }
     preencher(p); $("#app").hidden = false;
+    carregarVoucher();
   } catch (e) { console.error(e); $("#carregando").textContent = "Não deu para carregar agora. Confira a internet e atualize a página."; return; }
 
   $("#logo").addEventListener("change", async e => {

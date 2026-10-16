@@ -30,6 +30,15 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 - `painel.html` **painel da participante** por link pessoal `painel.html#<token_edicao>`: status, link do perfil para compartilhar, edição dos próprios dados e da foto (via RPC). O painel vem primeiro na tela de sucesso porque ele já contém o link do perfil: quem guarda só ele não perde nada.
 - `qr.html` tela para o painel de LED e mesas, com QR de cadastro e da vitrine (`assets/qr-*.svg`, apontando para bw.okgo.dev.br).
 
+## Presente Maresias Tour (voucher)
+Passeio de lancha compartilhada (As 3 Ilhas da Costa Sul) para as **20 primeiras participantes da lista do evento** que resgatarem, no painel. Válido até 16/02/2027, precisa de 1 acompanhante pagante.
+- **Quem tem direito é a lista de inscritas** (`bw_lista_evento`), não o cadastro: o cadastro é aberto a qualquer pessoa e ter perfil não prova presença. A comparação é por WhatsApp (sem 55 e sem máscara, `bw_fone`) ou por e-mail.
+- **Os códigos são cupons de uso único no sistema de passeios da Maresias Tour**: R$ 200 de desconto, valor mínimo R$ 300 e só nesse passeio. **O valor mínimo é a regra do acompanhante**: sozinha a reserva dá R$ 200 e o cupom não passa. A vitrine só guarda os códigos (`bw_vouchers`) e entrega um por participante.
+- O resgate é **uma função só no banco** (`bw_voucher(token, resgatar)`): confere a lista, trava o perfil e pega o próximo código livre com `skip locked`. Duas pessoas tocando juntas nunca pegam o mesmo código, e quem toca duas vezes recebe o mesmo.
+- **Nenhum dado da participante vai para a Maresias Tour**: é ela quem leva o código ao agendar, pelo WhatsApp deles. O consentimento do cadastro cobre a vitrine, não o repasse a patrocinadora.
+- O painel esconde o cartão se a função não existir no banco: a tela pode ir ao ar antes do banco.
+- SQL em `docs/voucher-maresiastur.sql`.
+
 ## Banco (ver `docs/`)
 - `bw_perfis`: perfis. `status` in (`pendente`,`aprovado`,`recusado` = oculto), `destaque`, `email` (privado), `token_edicao` (privado).
   - anon: insere só com `status='pendente'`, `destaque=false`, `consentimento=true`; lê só aprovados e só as colunas públicas (grant por coluna; `email` e `token_edicao` não são legíveis).
