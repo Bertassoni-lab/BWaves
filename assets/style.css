@@ -190,6 +190,19 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .hero-logo{width:min(46vw,190px);height:auto;margin-bottom:-6px}
 @media (max-width:440px){ .brand b{display:none} }
 
+/* foto do topo: só no computador, onde a coluna da direita ficava vazia.
+   No celular ela some (e, por ser lazy, nem é baixada). */
+.hero-foto{display:none;margin:0}
+@media (min-width:900px){
+  .hero .wrap{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);column-gap:48px;
+    grid-template-areas:"logo foto" "eyebrow foto" "titulo foto" "lede foto" "ctas foto" "how how"}
+  .hero-logo{grid-area:logo} .hero .eyebrow{grid-area:eyebrow} .hero h1{grid-area:titulo}
+  .hero p.lede{grid-area:lede} .hero .ctas{grid-area:ctas} .hero .how{grid-area:how}
+  .hero-foto{display:block;grid-area:foto;position:relative;min-height:360px;border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+  /* absoluta para a foto acompanhar a altura do texto, sem esticar as linhas do grid */
+  .hero-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:55% 30%}
+}
+
 /* fotos do evento: no celular a foto do grupo vem inteira, sem corte nos lados */
 .galeria{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);margin:0}
 .galeria figure{margin:0;overflow:hidden;border-radius:var(--r);background:var(--surface)}
