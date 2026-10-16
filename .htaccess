@@ -3,3 +3,11 @@
   Require all denied
 </FilesMatch>
 RedirectMatch 404 ^/docs(/.*)?$
+
+# Pagina sempre revalidada: o navegador e o cache do servidor conferem se ha versao nova
+# antes de usar a guardada. Sem isso, um aparelho ficava preso numa versao velha do site.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

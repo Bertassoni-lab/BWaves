@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Painel · Vitrine BW</title>
 <meta name="robots" content="noindex,nofollow">
-<meta property="og:image" content="https://bw.okgo.dev.br/assets/logo-bw.png">
+<meta property="og:image" content="https://bw.okgo.dev.br/assets/compartilhar.jpg">
 <link rel="icon" href="assets/logo-bw.png">
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -89,7 +89,7 @@
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
-<script src="assets/bw.js?v=20261015b"></script>
+<script src="assets/bw.js?v=20261016a"></script>
 <script>
 (async function () {
   const { sb, DEMO, C, esc, logoHTML, waLink } = BW;
@@ -176,16 +176,9 @@
     mostrarLogo(p.logo_url, p.nome_negocio);
     $("#ed").showModal();
   }
-  async function reduzir(file) {
-    const img = await createImageBitmap(file);
-    const k = Math.min(1, 600 / Math.max(img.width, img.height));
-    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-    return await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
-  }
   $("#eLogo").addEventListener("change", async e => {
     const f = e.target.files[0]; if (!f) return;
-    try { novoLogo = await reduzir(f); tirarLogo = false; mostrarLogo(URL.createObjectURL(novoLogo), ""); }
+    try { novoLogo = await BW.reduzirFoto(f); tirarLogo = false; mostrarLogo(URL.createObjectURL(novoLogo), ""); }
     catch (_) { const er = $("#eErr"); er.textContent = "Não consegui ler essa imagem. Tente um JPG ou PNG."; er.hidden = false; }
   });
   $("#eLogoTirar").addEventListener("click", () => { novoLogo = null; tirarLogo = true; $("#eLogo").value = ""; mostrarLogo("", $("#e_nome_negocio").value); });

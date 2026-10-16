@@ -20,6 +20,10 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 ## Páginas
 - `index.html` vitrine pública: filtros (todos, com oferta, participantes, patrocinadoras e parceiras), busca, segmento, perfil em modal (`#perfil-<id>`, sem o "Procuro": a pedido da organização ele aparece só na seção Conexões), seção Conexões ("Procuro" + botão "Posso ajudar" no WhatsApp), seção "O Business Wave" com fotos do evento (`assets/fotos/`, mosaico em `.galeria`). As fotos ficam depois da vitrine e das conexões: quem abre o site no evento quer achar um negócio primeiro. Essa seção vai virar a galeria das mídias do evento.
   - O topo (`.hero`) termina na foto do brinde (`bw-brinde.jpg`) atravessando a tela, com a borda de cima em onda e um fio dourado em cima dela,: é o nome do evento virando imagem. Ela abre a página, colada no menu, no celular e no computador: a onda leva ao título, sem corte seco. A logo grande saiu do topo (fica só no menu) para o texto ter espaço. O título é **proporcional à largura onde mora** (tela no celular, coluna no computador): fica sempre em três linhas cheias, "As mulheres do BW / e seus negócios, / num só lugar.", igual em qualquer aparelho. O fator `.137` sai da linha mais longa medida na Cormorant; trocar o texto do título pede medir de novo. A máscara (`.onda img`) e o fio (`.onda-fio`) usam **a mesma curva no mesmo viewBox esticado**; mudar uma sem a outra descola o fio da borda.
+  - Link de perfil que ainda não foi aprovado (o cadastro entrega o link na hora) abre um **aviso de "em análise"**, e não a vitrine muda. Se a tela ficar aberta, o perfil abre sozinho quando for aprovado.
+  - A vitrine **se atualiza sozinha** a cada minuto e ao voltar para a aba, sem atropelar um perfil aberto: no evento as aprovações saem a toda hora e ninguém recarrega a página.
+  - A busca compara **sem acento** (`BW.semAcento`): no celular quase ninguém digita acento.
+  - A prévia dos links no WhatsApp usa `assets/compartilhar.jpg` (1200×630, foto do brinde com a logo). O WhatsApp guarda a prévia por link; link já compartilhado pode demorar a mostrar a nova.
   - A galeria (`.galeria`) é em colunas, com cada foto no formato dela, sem corte: foto nova é só mais um `<figure>` com `width`/`height` certos, e a `.destaque` atravessa as colunas.
 - `cadastro.html` cadastro da participante (obrigatórios: nome, negócio, WhatsApp, segmento, e-mail e consentimento LGPD). Gera o `id` e o `token_edicao` no cliente e, no fim, mostra o link do painel pessoal (primeiro, com "Mandar para o meu WhatsApp", "Copiar" e "Abrir meu painel") e o link do perfil para compartilhar.
 - `admin.html` painel da organização (login Supabase Auth + tabela `bw_admins`): aprovar, aprovar todos, ocultar, destacar, **editar** (todos os campos e foto), WhatsApp, **enviar link do painel** (WhatsApp para a participante), baixar CSV, atualização a cada 30 s. O CSV não leva o token, de propósito.
@@ -35,7 +39,7 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
   - Todo usuário novo do projeto ganha uma linha em `nucleo.usuarios` pelo gatilho `nucleo_criar_usuario` (sistema da OkGo). É só id e nome, sem papel nem permissão; o nome vem de `raw_user_meta_data->>'nome'`.
 - `bw_embaixadoras`: sobra do escopo antigo (ranking). Não usada pelo site.
 - Funções da participante: `bw_meu_perfil(p_token)` e `bw_atualizar_meu_perfil(p_token, p_dados jsonb)` (security definer, só campos permitidos; não mexem em status/destaque).
-- Storage: bucket público `bw-logos` (jpeg/png/webp, 3 MB). Fotos são reduzidas para 600 px no navegador antes do upload.
+- Storage: bucket público `bw-logos` (jpeg/png/webp, 3 MB). Fotos são reduzidas para 600 px no navegador antes do upload, por **uma função só** (`BW.reduzirFoto`, usada no cadastro, no painel e no admin), que pinta **fundo branco** antes de virar JPG: no JPG o transparente vira preto, e logo com letra escura sumia (foi o que aconteceu com a da OkGo). Foto enviada antes de 16/10 com esse defeito precisa ser enviada de novo.
 - Migrações aplicadas: `docs/schema-inicial.sql` + `docs/migracoes-aplicadas.sql`.
 
 ## Testar
@@ -46,6 +50,7 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 - Auto-deploy da Hostinger ligado ao GitHub (repo `Bertassoni-lab/BWaves`, branch `main`, raiz do site bw.okgo.dev.br).
 - **O webhook falhou algumas vezes.** Depois de cada push, conferir se os arquivos no servidor mudaram (hPanel ou API da Hostinger). Se não mudaram, salvar de novo as configurações de auto-deploy (isso dispara o deploy na hora).
 - Ao mudar CSS/JS, trocar o `?v=` nos links das páginas para furar o cache dos navegadores.
+- O `.htaccess` manda `Cache-Control: no-cache` nas páginas `.html`: o navegador confere se há versão nova antes de usar a guardada. Antes disso, aparelhos ficaram presos em versões velhas, e a Hostinger também guarda cache (limpar pela API depois de publicar).
 
 ## Próximos passos
 1. Segunda etapa: login de participante com **e-mail e senha** (Supabase Auth). Exige desligar "Confirm email" no Supabase; "esqueci a senha" depende de configurar SMTP próprio (o SMTP padrão do Supabase só envia para a equipe do projeto).

@@ -7,7 +7,12 @@
 <meta name="description" content="As mulheres do Business Wave e seus negócios num só lugar, com ofertas exclusivas e conexões que continuam depois do evento.">
 <meta property="og:title" content="Vitrine BW · Business Wave">
 <meta property="og:description" content="As mulheres do Business Wave e seus negócios num só lugar, com ofertas exclusivas.">
-<meta property="og:image" content="https://bw.okgo.dev.br/assets/logo-bw.png">
+<meta property="og:image" content="https://bw.okgo.dev.br/assets/compartilhar.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vitrine BW · Business Wave">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/logo-bw.png">
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +140,7 @@
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
-<script src="assets/bw.js?v=20261015b"></script>
+<script src="assets/bw.js?v=20261016a"></script>
 <script>
 (async function () {
   const { C, esc, logoHTML, waLink, ig, safeUrl, SEGMENTOS } = BW;
@@ -160,13 +165,13 @@
   }
 
   function filtrar() {
-    const termo = q.trim().toLowerCase();
+    const termo = BW.semAcento(q.trim());
     return todos.filter(p => {
       if (tipo === "oferta" && !p.oferta_bw) return false;
       if (tipo === "participante" && p.tipo !== "participante") return false;
       if (tipo === "marcas" && p.tipo === "participante") return false;
       if (seg && p.segmento !== seg) return false;
-      if (termo && ![p.nome_negocio, p.descricao, p.segmento, p.cidade, p.ofereco, p.preciso, p.responsavel, p.oferta_bw].join(" ").toLowerCase().includes(termo)) return false;
+      if (termo && !BW.semAcento([p.nome_negocio, p.descricao, p.segmento, p.cidade, p.ofereco, p.preciso, p.responsavel, p.oferta_bw].join(" ")).includes(termo)) return false;
       return true;
     });
   }
@@ -211,13 +216,28 @@
         ${insta ? `<a class="btn ghost" href="https://instagram.com/${esc(insta)}" target="_blank" rel="noopener">@${esc(insta)}</a>` : ""}
         ${p.site ? `<a class="btn ghost" href="${esc(safeUrl(p.site))}" target="_blank" rel="noopener">Site</a>` : ""}
       </div>`;
-    $("#dlg").showModal();
+    if (!$("#dlg").open) $("#dlg").showModal();
     history.replaceState(null, "", "#perfil-" + p.id);
+  }
+
+  // O cadastro entrega o link do perfil na hora, mas ele so' aparece depois da aprovacao.
+  // Antes, quem abria caia na vitrine sem saber por que; agora ve o aviso, e se a tela
+  // ficar aberta o perfil abre sozinho quando for aprovado.
+  let aguardando = null;
+  function avisoPerfil(id) {
+    aguardando = String(id);
+    $("#dBody").innerHTML = `
+      <button class="x" type="button" aria-label="Fechar" data-close>×</button>
+      <div class="eyebrow">Perfil em análise</div>
+      <h2 id="dName">Este negócio ainda não está na vitrine</h2>
+      <p style="margin:0;color:var(--muted)">Os perfis aparecem aqui depois que a organização do Business Wave aprova o cadastro. Deixe esta tela aberta: quando ele for aprovado, abre aqui sozinho.</p>
+      <div class="acts"><button class="btn" type="button" data-close>Ver a vitrine</button></div>`;
+    $("#dlg").showModal();
   }
   $("#grid").addEventListener("click", e => { const c = e.target.closest(".card"); if (c) abrir(c.dataset.id); });
   $("#asks").addEventListener("click", e => { const b = e.target.closest("[data-perfil]"); if (b) abrir(b.dataset.perfil); });
   $("#dlg").addEventListener("click", e => { if (e.target.closest("[data-close]") || e.target === e.currentTarget) e.currentTarget.close(); });
-  $("#dlg").addEventListener("close", () => history.replaceState(null, "", location.pathname + "#vitrine"));
+  $("#dlg").addEventListener("close", () => { aguardando = null; history.replaceState(null, "", location.pathname + "#vitrine"); });
 
   function setTipo(t) {
     document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tipo === t)));
@@ -231,7 +251,20 @@
   try { todos = await BW.listarVitrine(); }
   catch (e) { console.error(e); $("#empty").hidden = false; $("#empty").innerHTML = "<b>Não deu para carregar a vitrine agora.</b>Atualize a página em alguns segundos."; }
   render(); renderAsks();
-  const m = location.hash.match(/^#perfil-(.+)$/); if (m) abrir(m[1]);
+  const m = location.hash.match(/^#perfil-(.+)$/);
+  if (m) { if (todos.some(x => String(x.id) === m[1])) abrir(m[1]); else avisoPerfil(m[1]); }
+
+  // 6) a vitrine se atualiza sozinha: no evento as aprovacoes saem a toda hora e
+  // ninguem recarrega a pagina. Nao mexe com o perfil aberto na frente da pessoa.
+  async function atualizar() {
+    if (document.hidden || ($("#dlg").open && !aguardando)) return;
+    let novos; try { novos = await BW.listarVitrine(); } catch (_) { return; }
+    if (JSON.stringify(novos) === JSON.stringify(todos)) return;
+    todos = novos; render(); renderAsks();
+    if (aguardando && todos.some(x => String(x.id) === aguardando)) { const id = aguardando; aguardando = null; abrir(id); }
+  }
+  setInterval(atualizar, 60000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) atualizar(); });
   if (location.hash === "#ofertas") { setTipo("oferta"); $("#vitrine").scrollIntoView(); }
 })();
 </script>

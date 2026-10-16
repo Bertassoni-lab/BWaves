@@ -46,6 +46,7 @@
         <a class="btn sm ghost" id="verPerfil" href="#" target="_blank" rel="noopener">Ver como aparece</a>
       </div>
       <span class="meta" id="copiadoPerfil" hidden>Link copiado.</span>
+      <span class="meta" id="avisoAnalise" hidden>Enquanto o perfil está em análise, quem abrir o link vê um aviso de que ele entra na vitrine depois da aprovação.</span>
     </div>
 
     <form class="form" id="f" novalidate style="max-width:none">
@@ -92,7 +93,7 @@
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015d"></script>
-<script src="assets/bw.js?v=20261015d"></script>
+<script src="assets/bw.js?v=20261016a"></script>
 <script>
 (async function () {
   const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos, iniciais } = BW;
@@ -118,6 +119,7 @@
     $("#ola").textContent = p.responsavel; $("#tNegocio").textContent = p.nome_negocio;
     const [cls, txt] = STATUS[p.status] || STATUS.pendente;
     $("#status").innerHTML = `<span class="pill ${cls}">${esc(txt)}</span>`;
+    $("#avisoAnalise").hidden = p.status !== "pendente";
     CAMPOS.forEach(c => $("#" + c).value = p[c] ?? "");
     if (p.segmento && ![...$("#segmento").options].some(o => o.value === p.segmento)) { $("#segmento").insertAdjacentHTML("beforeend", `<option>${esc(p.segmento)}</option>`); $("#segmento").value = p.segmento; }
     mostrarLogo(p.logo_url, p.nome_negocio);
@@ -145,16 +147,9 @@
     preencher(p); $("#app").hidden = false;
   } catch (e) { console.error(e); $("#carregando").textContent = "Não deu para carregar agora. Confira a internet e atualize a página."; return; }
 
-  async function reduzir(file) {
-    const img = await createImageBitmap(file);
-    const k = Math.min(1, 600 / Math.max(img.width, img.height));
-    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-    return await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
-  }
   $("#logo").addEventListener("change", async e => {
     const f = e.target.files[0]; if (!f) return;
-    try { novoLogo = await reduzir(f); tirarLogo = false; mostrarLogo(URL.createObjectURL(novoLogo), ""); }
+    try { novoLogo = await BW.reduzirFoto(f); tirarLogo = false; mostrarLogo(URL.createObjectURL(novoLogo), ""); }
     catch (_) { erro("Não consegui ler essa imagem. Tente um JPG ou PNG."); }
   });
   $("#tirarLogo").addEventListener("click", () => { novoLogo = null; tirarLogo = true; $("#logo").value = ""; mostrarLogo("", $("#nome_negocio").value); });
