@@ -22,6 +22,7 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
   - O topo (`.hero`) termina na foto do brinde (`bw-brinde.jpg`) atravessando a tela, com a borda de cima em onda e um fio dourado em cima dela,: é o nome do evento virando imagem. Ela abre a página, colada no menu, no celular e no computador: a onda leva ao título, sem corte seco. A logo grande saiu do topo (fica só no menu) para o texto ter espaço. O título é **proporcional à largura onde mora** (tela no celular, coluna no computador): fica sempre em três linhas cheias, "As mulheres do BW / e seus negócios, / num só lugar.", igual em qualquer aparelho. O fator `.137` sai da linha mais longa medida na Cormorant; trocar o texto do título pede medir de novo. A máscara (`.onda img`) e o fio (`.onda-fio`) usam **a mesma curva no mesmo viewBox esticado**; mudar uma sem a outra descola o fio da borda.
   - Link de perfil que ainda não foi aprovado (o cadastro entrega o link na hora) abre um **aviso de "em análise"**, e não a vitrine muda. Se a tela ficar aberta, o perfil abre sozinho quando for aprovado.
   - A vitrine **se atualiza sozinha** a cada minuto e ao voltar para a aba, sem atropelar um perfil aberto: no evento as aprovações saem a toda hora e ninguém recarrega a página.
+  - **"Quero essa oferta"** leva para o **link da oferta** (`oferta_link`) quando a participante informa um: loja, agenda, página de vendas (a da OkGo vai para o Site Vendedor). Sem link, abre o WhatsApp dela com a oferta escrita na mensagem. O link é opcional no cadastro, no painel e no admin, e fica dentro da caixa da oferta porque só vale junto com ela.
   - A busca compara **sem acento** (`BW.semAcento`): no celular quase ninguém digita acento.
   - A prévia dos links no WhatsApp usa `assets/compartilhar.jpg` (1200×630, foto do brinde com a logo). O WhatsApp guarda a prévia por link; link já compartilhado pode demorar a mostrar a nova.
   - **Pré-venda da 6ª edição (2027)**: seção `#prevenda` depois da galeria, com atalho no menu e no rodapé, levando para `businesswave.com.br/pre-venda-business-wave-2027/` em nova aba. Os links levam `utm_source=vitrine-bw` e `utm_content` (`secao` ou `rodape`), para a organização saber quantas vendas vieram da vitrine. A seção não cita preço, data nem lote: a página da pré-venda é a fonte, e um número escrito aqui ficaria velho sem ninguém ver.
@@ -32,7 +33,8 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 - `qr.html` tela para o painel de LED e mesas, com QR de cadastro e da vitrine (`assets/qr-*.svg`, apontando para bw.okgo.dev.br).
 
 ## Banco (ver `docs/`)
-- `bw_perfis`: perfis. `status` in (`pendente`,`aprovado`,`recusado` = oculto), `destaque`, `email` (privado), `token_edicao` (privado).
+- `bw_perfis`: perfis. `status` in (`pendente`,`aprovado`,`recusado` = oculto), `destaque`, `email` (privado), `token_edicao` (privado), `oferta_link` (público, opcional).
+  - `oferta_link` só aceita `http(s)://` sem espaço, até 300 caracteres (restrição `bw_perfis_oferta_link_url`). As telas completam o `https://` e conferem antes com `BW.linkOferta`, e a RPC do painel completa também: quem digita "minhaloja.com" não pode receber um "não salvou" sem motivo.
   - anon: insere só com `status='pendente'`, `destaque=false`, `consentimento=true`; lê só aprovados e só as colunas públicas (grant por coluna; `email` e `token_edicao` não são legíveis).
   - admin (`bw_is_admin()` = usuário em `bw_admins`): lê, edita e apaga tudo.
 - `bw_admins`: hoje 2 admins, drihollandh@gmail.com e vitoriamdfl@gmail.com (Vitória Lemes, criada em 15/10/2026 com senha temporária).
@@ -40,6 +42,7 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
   - Todo usuário novo do projeto ganha uma linha em `nucleo.usuarios` pelo gatilho `nucleo_criar_usuario` (sistema da OkGo). É só id e nome, sem papel nem permissão; o nome vem de `raw_user_meta_data->>'nome'`.
 - `bw_embaixadoras`: sobra do escopo antigo (ranking). Não usada pelo site.
 - Funções da participante: `bw_meu_perfil(p_token)` e `bw_atualizar_meu_perfil(p_token, p_dados jsonb)` (security definer, só campos permitidos; não mexem em status/destaque).
+  - `bw_meu_perfil_v1` é a versão antiga, **renomeada e sem permissão para ninguém**. A ferramenta do Supabase usada pelo Claude trava em `DROP` (pede uma confirmação que não chega), então mudar o retorno de uma função é renomear a antiga e criar a nova. Pode ser apagada pelo SQL Editor.
 - Storage: bucket público `bw-logos` (jpeg/png/webp, 3 MB). Fotos são reduzidas para 600 px no navegador antes do upload, por **uma função só** (`BW.reduzirFoto`, usada no cadastro, no painel e no admin), que pinta **fundo branco** antes de virar JPG: no JPG o transparente vira preto, e logo com letra escura sumia (foi o que aconteceu com a da OkGo). Foto enviada antes de 16/10 com esse defeito precisa ser enviada de novo.
 - Migrações aplicadas: `docs/schema-inicial.sql` + `docs/migracoes-aplicadas.sql`.
 

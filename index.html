@@ -153,7 +153,7 @@
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
-<script src="assets/bw.js?v=20261016a"></script>
+<script src="assets/bw.js?v=20261016b"></script>
 <script>
 (async function () {
   const { C, esc, logoHTML, waLink, ig, safeUrl, SEGMENTOS } = BW;
@@ -216,12 +216,14 @@
   function abrir(id) {
     const p = todos.find(x => String(x.id) === String(id)); if (!p) return;
     const wa = waLink(p.whatsapp, `Oi, ${p.responsavel}! Te encontrei na Vitrine do Business Wave.`);
-    const waOferta = p.oferta_bw ? waLink(p.whatsapp, `Oi, ${p.responsavel}! Sou do Business Wave e quero aproveitar a oferta exclusiva: ${p.oferta_bw}`) : "";
+    // Oferta com pagina propria (loja, agenda, pagina de vendas) leva para la'; sem link, abre o WhatsApp.
+    const destinoOferta = !p.oferta_bw ? "" : p.oferta_link ? safeUrl(p.oferta_link)
+      : waLink(p.whatsapp, `Oi, ${p.responsavel}! Sou do Business Wave e quero aproveitar a oferta exclusiva: ${p.oferta_bw}`);
     const insta = ig(p.instagram);
     $("#dBody").innerHTML = `
       <button class="x" type="button" aria-label="Fechar" data-close>×</button>
       <div class="dlg-head">${logoHTML(p)}<div><div class="eyebrow">${esc(TIPO_LABEL[p.tipo])} · ${esc(p.segmento)}</div><h2 id="dName">${esc(p.nome_negocio)}</h2><div class="meta">${esc(p.responsavel)}${p.cidade ? " · " + esc(p.cidade) : ""}</div></div></div>
-      ${p.oferta_bw ? `<div class="offer"><b>Oferta exclusiva BW</b><p>${esc(p.oferta_bw)}</p>${waOferta ? `<a class="btn sm" style="margin-top:10px" href="${esc(waOferta)}" target="_blank" rel="noopener">Quero essa oferta</a>` : ""}</div>` : ""}
+      ${p.oferta_bw ? `<div class="offer"><b>Oferta exclusiva BW</b><p>${esc(p.oferta_bw)}</p>${destinoOferta ? `<a class="btn sm" style="margin-top:10px" href="${esc(destinoOferta)}" target="_blank" rel="noopener">Quero essa oferta</a>` : ""}</div>` : ""}
       ${p.descricao ? `<p style="margin:0">${esc(p.descricao)}</p>` : ""}
       ${p.ofereco ? `<div class="kv" style="grid-template-columns:1fr"><div><small>Ofereço</small>${esc(p.ofereco)}</div></div>` : ""}
       <div class="acts">

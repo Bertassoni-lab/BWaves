@@ -68,6 +68,7 @@
       <div class="field"><label for="e_segmento">Segmento</label><select id="e_segmento"></select></div>
     </div>
     <div class="field"><label for="e_oferta_bw">Oferta exclusiva BW</label><input id="e_oferta_bw" maxlength="160"></div>
+    <div class="field"><label for="e_oferta_link">Link da oferta</label><span class="h">O botão “Quero essa oferta” leva para cá. Vazio, abre o WhatsApp.</span><input id="e_oferta_link" maxlength="300" inputmode="url"></div>
     <div class="two">
       <div class="field"><label for="e_instagram">Instagram</label><input id="e_instagram" maxlength="60"></div>
       <div class="field"><label for="e_cidade">Cidade</label><input id="e_cidade" maxlength="60"></div>
@@ -89,7 +90,7 @@
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
-<script src="assets/bw.js?v=20261016a"></script>
+<script src="assets/bw.js?v=20261016b"></script>
 <script>
 (async function () {
   const { sb, DEMO, C, esc, logoHTML, waLink } = BW;
@@ -123,7 +124,7 @@
           <div><b>${esc(p.nome_negocio)}</b>${p.destaque ? ' <span class="tag sp">Destaque</span>' : ""}</div>
           <div class="meta">${esc(p.responsavel)} · ${esc(TIPO[p.tipo])} · ${esc(p.segmento)}${p.cidade ? " · " + esc(p.cidade) : ""}</div>
           <div class="meta">${esc(p.email || "")}${p.whatsapp ? " · " + esc(p.whatsapp) : ""}${p.instagram ? " · @" + esc(p.instagram) : ""}</div>
-          ${p.oferta_bw ? `<div class="mini-offer"><b>Oferta BW</b> ${esc(p.oferta_bw)}</div>` : ""}
+          ${p.oferta_bw ? `<div class="mini-offer"><b>Oferta BW</b> ${esc(p.oferta_bw)}${p.oferta_link ? ` · <a href="${esc(BW.safeUrl(p.oferta_link))}" target="_blank" rel="noopener">link da oferta</a>` : ""}</div>` : ""}
           ${p.descricao ? `<div style="font-size:14px">${esc(p.descricao)}</div>` : ""}
           ${p.preciso ? `<div class="meta">Procura: ${esc(p.preciso)}</div>` : ""}
         </div>
@@ -163,7 +164,7 @@
   });
 
   // edição de perfil
-  const CAMPOS = ["responsavel","nome_negocio","whatsapp","segmento","oferta_bw","instagram","cidade","descricao","ofereco","preciso","site","email","tipo"];
+  const CAMPOS = ["responsavel","nome_negocio","whatsapp","segmento","oferta_bw","oferta_link","instagram","cidade","descricao","ofereco","preciso","site","email","tipo"];
   BW.SEGMENTOS.forEach(s => $("#e_segmento").insertAdjacentHTML("beforeend", `<option>${esc(s)}</option>`));
   let editando = null, novoLogo = null, tirarLogo = false;
   function mostrarLogo(src, nome) {
@@ -192,6 +193,9 @@
     CAMPOS.forEach(c => { patch[c] = v(c) || null; });
     patch.whatsapp = BW.soDigitos(v("whatsapp")) || null;
     patch.instagram = BW.ig(v("instagram")) || null;
+    patch.oferta_link = BW.linkOferta(v("oferta_link"));
+    if (patch.oferta_link === null) { er.textContent = "Confira o link da oferta: o endereço da página, sem espaços."; er.hidden = false; return; }
+    patch.oferta_link = patch.oferta_link || null;
     if (!patch.email) patch.email = editando.email; // e-mail é obrigatório no banco
     const btn = $("#eSave"); btn.disabled = true; btn.textContent = "Salvando…";
     try {
@@ -213,7 +217,7 @@
 
   // lista para a organização (abre como arquivo no navegador)
   $("#csv").addEventListener("click", () => {
-    const cols = ["nome_negocio","responsavel","tipo","segmento","cidade","whatsapp","email","instagram","site","oferta_bw","ofereco","preciso","status","created_at"];
+    const cols = ["nome_negocio","responsavel","tipo","segmento","cidade","whatsapp","email","instagram","site","oferta_bw","oferta_link","ofereco","preciso","status","created_at"];
     const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = "﻿" + cols.join(";") + "\n" + perfis.map(p => cols.map(c => q(p[c])).join(";")).join("\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
