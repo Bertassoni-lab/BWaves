@@ -17,7 +17,7 @@
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=20261016g">
+<link rel="stylesheet" href="assets/style.css?v=20261017a">
 </head>
 <body>
 <header class="top">
@@ -41,7 +41,7 @@
           <svg class="onda-fio" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden="true"><path d="M1440 530 C1200 590 960 590 720 545 S240 490 0 560"/><path class="eco" d="M1440 550 C1200 610 960 610 720 565 S240 510 0 580"/></svg>
         </div>
       </figure>
-      <div class="eyebrow">Vitrine BW · <span id="edicao">5ª edição</span></div>
+      <div class="eyebrow">Vitrine BW · rumo à 6ª edição</div>
       <h1>As mulheres do BW e seus negócios, <em>num só lugar.</em></h1>
       <div class="hero-lado">
         <p class="lede">Conheça quem faz parte do Business Wave, aproveite as ofertas exclusivas entre nós e transforme os encontros do evento em conexões que continuam.</p>
@@ -60,7 +60,27 @@
     </div>
   </section>
 
-  <section class="blk" id="vitrine">
+  <!-- A 5a edicao ja passou: a pre-venda da 6a sobe para logo depois do topo, com a foto
+       da 5a vendendo a proxima. Sem preco, data nem lote: a pagina da pre-venda e' a fonte. -->
+  <section class="blk" id="prevenda">
+    <div class="wrap">
+      <div class="prevenda-card">
+        <figure class="prevenda-foto">
+          <img src="assets/fotos/bw-5a-edicao.jpg" width="1400" height="933" alt="Participantes da 5ª edição do Business Wave reunidas para a foto em grupo, em tons de rosa, brindando juntas">
+          <figcaption>5ª edição · 16/10/2026</figcaption>
+        </figure>
+        <div class="prevenda-texto">
+          <div class="eyebrow">Pré-venda · Business Wave 2027</div>
+          <h2>A 5ª edição foi assim. <em>A 6ª já tem <span class="nw">pré-venda</span> aberta.</em></h2>
+          <p>Garanta seu lugar na próxima onda do Business Wave antes da venda geral.</p>
+          <div class="acts"><a class="btn" href="https://businesswave.com.br/pre-venda-business-wave-2027/?utm_source=vitrine-bw&amp;utm_medium=site&amp;utm_campaign=prevenda-2027&amp;utm_content=secao" target="_blank" rel="noopener">Garantir meu lugar na pré-venda</a></div>
+          <svg class="prevenda-onda" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70 C240 10 480 10 720 55 S1200 110 1440 40"/><path class="eco" d="M0 90 C240 30 480 30 720 75 S1200 130 1440 60"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" id="vitrine" style="border-top:1px solid var(--line)">
     <div class="wrap">
       <div class="sec-head">
         <div>
@@ -120,18 +140,6 @@
     </div>
   </section>
 
-  <section class="blk" id="prevenda" style="border-top:1px solid var(--line)">
-    <div class="wrap">
-      <div class="prevenda-card">
-        <div class="eyebrow">Pré-venda · Business Wave 2027</div>
-        <h2>A 6ª edição já tem <em>pré-venda aberta.</em></h2>
-        <p>Garanta seu lugar na próxima onda do Business Wave antes da venda geral.</p>
-        <div class="acts"><a class="btn" href="https://businesswave.com.br/pre-venda-business-wave-2027/?utm_source=vitrine-bw&amp;utm_medium=site&amp;utm_campaign=prevenda-2027&amp;utm_content=secao" target="_blank" rel="noopener">Garantir meu lugar na pré-venda</a></div>
-        <svg class="prevenda-onda" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70 C240 10 480 10 720 55 S1200 110 1440 40"/><path class="eco" d="M0 90 C240 30 480 30 720 75 S1200 130 1440 60"/></svg>
-      </div>
-    </div>
-  </section>
-
   <section class="band">
     <div class="wrap">
       <h2>Seu negócio também faz parte dessa onda.</h2>
@@ -159,7 +167,6 @@
   const { C, esc, logoHTML, waLink, ig, safeUrl, SEGMENTOS } = BW;
   const $ = s => document.querySelector(s);
 
-  $("#edicao").textContent = C.EVENTO.edicao;
   $("#igFoot").href = "https://instagram.com/" + C.INSTAGRAM;
 
   const segSel = $("#seg");

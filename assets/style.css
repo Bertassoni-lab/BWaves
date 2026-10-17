@@ -231,10 +231,23 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .galeria img{display:block;width:100%;height:auto}
 
 /* pre-venda da proxima edicao: cartao dourado com o mesmo fio em onda do topo */
-.prevenda-card{position:relative;overflow:hidden;display:grid;gap:16px;justify-items:start;padding:clamp(24px,5vw,48px) clamp(22px,5vw,48px) clamp(64px,9vw,96px);border:1px solid var(--gold);border-radius:var(--r);background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--gold) 16%,transparent),transparent 60%),var(--surface)}
-.prevenda-card h2{font-style:italic;font-size:clamp(34px,6vw,56px);line-height:1.02;max-width:16ch}
-.prevenda-card h2 em{color:var(--gold)}
-.prevenda-card p{margin:0;color:var(--muted);max-width:52ch;font-size:17px}
+.prevenda-card{display:grid;overflow:hidden;border:1px solid var(--gold);border-radius:var(--r);background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--gold) 16%,transparent),transparent 60%),var(--surface)}
+.prevenda-foto{position:relative;margin:0}
+.prevenda-foto img{display:block;width:100%;height:100%;aspect-ratio:3/2;object-fit:cover}
+.prevenda-foto figcaption{position:absolute;left:12px;bottom:12px;padding:6px 10px;border-radius:999px;background:rgb(12 11 9 / .72);color:var(--gold-2);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+.prevenda-texto{position:relative;display:grid;gap:16px;justify-items:start;align-content:center;padding:clamp(24px,5vw,48px) clamp(22px,5vw,48px) clamp(64px,9vw,96px)}
+.prevenda-texto h2{font-style:italic;font-size:clamp(34px,6vw,56px);line-height:1.02;max-width:16ch}
+.prevenda-texto h2 em{display:block;color:var(--gold)}
+.prevenda-texto p{margin:0;color:var(--muted);max-width:52ch;font-size:17px}
+.nw{white-space:nowrap}
+/* no computador a foto fica larga o bastante para manter quase o 3:2 dela: foto de grupo
+   cortada nas pontas deixa gente de fora */
+@media (min-width:1100px){
+  .prevenda-card{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+  .prevenda-foto img{aspect-ratio:auto;object-position:50% 60%}
+  .prevenda-texto{padding-top:36px}
+  .prevenda-texto h2{font-size:clamp(34px,3.2vw,44px)}
+}
 .prevenda-onda{position:absolute;left:0;bottom:0;width:100%;height:clamp(50px,7vw,90px);pointer-events:none}
 .prevenda-onda path{fill:none;stroke:var(--gold);stroke-width:1.2;vector-effect:non-scaling-stroke;opacity:.7}
 .prevenda-onda .eco{stroke:var(--gold-2);opacity:.35}
