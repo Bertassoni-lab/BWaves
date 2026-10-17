@@ -17,7 +17,7 @@
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=20261017a">
+<link rel="stylesheet" href="assets/style.css?v=20261017b">
 </head>
 <body>
 <header class="top">
@@ -25,7 +25,6 @@
     <a class="brand" href="./"><img class="brand-logo" src="assets/logo-bw.png" alt="Business Wave"><b>Vitrine</b></a>
     <nav>
       <a class="lk" href="#vitrine">Vitrine</a>
-      <a class="lk" href="#conexoes">Conexões</a>
       <a class="lk" href="#prevenda">Pré-venda 2027</a>
       <a class="btn sm" href="cadastro.html">Cadastrar meu negócio</a>
     </nav>
@@ -106,19 +105,6 @@
     </div>
   </section>
 
-  <section class="blk" id="conexoes" style="border-top:1px solid var(--line)">
-    <div class="wrap">
-      <div class="sec-head">
-        <div>
-          <h2>Conexões</h2>
-          <p>O que as mulheres do BW estão procurando agora. Se você pode ajudar, chame direto.</p>
-        </div>
-      </div>
-      <div class="asks" id="asks"></div>
-      <div class="empty" id="asksEmpty" hidden><b>Nenhum pedido ainda.</b>Ao se cadastrar, conte o que você procura: parcerias, serviços ou clientes.</div>
-    </div>
-  </section>
-
   <section class="blk" id="evento" style="border-top:1px solid var(--line)">
     <div class="wrap">
       <div class="sec-head">
@@ -161,7 +147,7 @@
 
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
-<script src="assets/bw.js?v=20261016b"></script>
+<script src="assets/bw.js?v=20261017a"></script>
 <script>
 (async function () {
   const { C, esc, logoHTML, waLink, ig, safeUrl, SEGMENTOS } = BW;
@@ -191,7 +177,7 @@
       if (tipo === "participante" && p.tipo !== "participante") return false;
       if (tipo === "marcas" && p.tipo === "participante") return false;
       if (seg && p.segmento !== seg) return false;
-      if (termo && !BW.semAcento([p.nome_negocio, p.descricao, p.segmento, p.cidade, p.ofereco, p.preciso, p.responsavel, p.oferta_bw].join(" ")).includes(termo)) return false;
+      if (termo && !BW.semAcento([p.nome_negocio, p.descricao, p.segmento, p.cidade, p.ofereco, p.responsavel, p.oferta_bw].join(" ")).includes(termo)) return false;
       return true;
     });
   }
@@ -205,19 +191,6 @@
     if (!todos.length) { empty.hidden = false; empty.innerHTML = `<b>A vitrine está abrindo agora.</b>Os primeiros negócios aparecem aqui logo após a aprovação. <a href="cadastro.html">Cadastre o seu</a>.`; }
     else if (!lista.length) { empty.hidden = false; empty.innerHTML = `<b>Nada encontrado com esses filtros.</b>Tente outro segmento ou limpe a busca.`; }
     else empty.hidden = true;
-  }
-
-  function renderAsks() {
-    const pedidos = todos.filter(p => p.preciso);
-    $("#asks").innerHTML = pedidos.map(p => {
-      const wa = waLink(p.whatsapp, `Oi, ${p.responsavel}! Vi na Vitrine do Business Wave que você procura "${p.preciso}". Acho que posso ajudar.`);
-      return `<div class="ask">
-        <div class="ask-head">${logoHTML(p)}<div style="min-width:0"><b>${esc(p.responsavel)}</b><div class="meta">${esc(p.nome_negocio)}</div></div></div>
-        <p><span class="meta">Procura</span><br>${esc(p.preciso)}</p>
-        <div class="acts">${wa ? `<a class="btn sm" href="${esc(wa)}" target="_blank" rel="noopener">Posso ajudar</a>` : ""}<button class="btn sm ghost" type="button" data-perfil="${esc(p.id)}">Ver perfil</button></div>
-      </div>`;
-    }).join("");
-    $("#asksEmpty").hidden = pedidos.length > 0;
   }
 
   function abrir(id) {
@@ -257,7 +230,6 @@
     $("#dlg").showModal();
   }
   $("#grid").addEventListener("click", e => { const c = e.target.closest(".card"); if (c) abrir(c.dataset.id); });
-  $("#asks").addEventListener("click", e => { const b = e.target.closest("[data-perfil]"); if (b) abrir(b.dataset.perfil); });
   $("#dlg").addEventListener("click", e => { if (e.target.closest("[data-close]") || e.target === e.currentTarget) e.currentTarget.close(); });
   $("#dlg").addEventListener("close", () => { aguardando = null; history.replaceState(null, "", location.pathname + "#vitrine"); });
 
@@ -272,7 +244,7 @@
 
   try { todos = await BW.listarVitrine(); }
   catch (e) { console.error(e); $("#empty").hidden = false; $("#empty").innerHTML = "<b>Não deu para carregar a vitrine agora.</b>Atualize a página em alguns segundos."; }
-  render(); renderAsks();
+  render();
   const m = location.hash.match(/^#perfil-(.+)$/);
   if (m) { if (todos.some(x => String(x.id) === m[1])) abrir(m[1]); else avisoPerfil(m[1]); }
 
@@ -282,7 +254,7 @@
     if (document.hidden || ($("#dlg").open && !aguardando)) return;
     let novos; try { novos = await BW.listarVitrine(); } catch (_) { return; }
     if (JSON.stringify(novos) === JSON.stringify(todos)) return;
-    todos = novos; render(); renderAsks();
+    todos = novos; render();
     if (aguardando && todos.some(x => String(x.id) === aguardando)) { const id = aguardando; aguardando = null; abrir(id); }
   }
   setInterval(atualizar, 60000);

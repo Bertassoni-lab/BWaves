@@ -4,7 +4,7 @@
   const DEMO = !C.SUPABASE_URL || !C.SUPABASE_ANON_KEY;
   const sb = DEMO ? null : window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
 
-  const PUBLIC_COLS = "id,created_at,tipo,nome_negocio,responsavel,segmento,cidade,descricao,instagram,whatsapp,site,logo_url,oferta_bw,oferta_link,ofereco,preciso,destaque";
+  const PUBLIC_COLS = "id,created_at,tipo,nome_negocio,responsavel,segmento,cidade,descricao,instagram,whatsapp,site,logo_url,oferta_bw,oferta_link,ofereco,destaque";
 
   const SEGMENTOS = ["Beleza e estética","Moda","Alimentação e gastronomia","Saúde e bem-estar","Turismo e hospedagem","Imóveis","Educação e mentoria","Marketing e comunicação","Serviços","Decoração e eventos","Fotografia","Artesanato","Negócios locais","Outro"];
 
