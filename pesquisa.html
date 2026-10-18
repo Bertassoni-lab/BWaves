@@ -43,7 +43,7 @@
 
   <form class="form" id="f" novalidate>
     <div id="perguntas" style="display:grid;gap:22px"></div>
-    <div style="position:absolute;left:-9999px" aria-hidden="true"><label for="empresa_site">Não preencha</label><input id="empresa_site" tabindex="-1" autocomplete="off"></div>
+    <div style="position:absolute;left:-9999px" aria-hidden="true"><label for="campo_extra">Deixe em branco</label><input id="campo_extra" tabindex="-1" autocomplete="off"></div>
     <div class="msg err" id="err" hidden></div>
     <div><button class="btn" id="send" type="submit" style="width:100%;max-width:320px">Enviar respostas</button></div>
   </form>
@@ -127,7 +127,8 @@
 
   $("#f").addEventListener("submit", async e => {
     e.preventDefault(); erro("");
-    if ($("#empresa_site").value) return;
+    // isca para robo: nome neutro, senao o preenchimento automatico do celular a confunde com "empresa"
+    if ($("#campo_extra").value) return;
     const r = coletar(), falta = P.faltando(r);
     if (falta.length) {
       falta.forEach(c => $(`#q-${c}`).classList.add("falta"));

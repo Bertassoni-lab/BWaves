@@ -109,7 +109,8 @@
       cols.push([perguntas[c].curto, r => rotulo(c, r[c])]);
       if (perguntas[c].outro) cols.push([perguntas[c].curto + " (outro)", r => r[c + "_outro"] || ""]);
     });
-    const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    // Resposta que comeca com = + - @ viraria formula no Excel ("- som baixo" aparece como #NOME?): vai como texto.
+    const q = v => { const s = String(v ?? ""); return `"${(/^[=+\-@\t\r]/.test(s) ? "'" + s : s).replace(/"/g, '""')}"`; };
     return "﻿" + [cols.map(c => q(c[0])).join(";"), ...respostas.map(r => cols.map(c => q(c[1](r))).join(";"))].join("\n");
   }
 

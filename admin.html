@@ -317,7 +317,8 @@
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([P.csv(respostas || [])], { type: "text/csv;charset=utf-8" }));
     a.download = "pesquisa-bw-5a-edicao.csv"; document.body.appendChild(a); a.click(); a.remove();
   });
-  $("#pAtualizar").addEventListener("click", () => { if (!DEMO) respostas = null; carregarPesquisa().catch(avisarPesquisa); });
+  // Atualizar so troca a lista quando a nova chegou: falha de rede deixa a anterior (apagar e planilha seguem valendo).
+  $("#pAtualizar").addEventListener("click", () => carregarPesquisa().catch(avisarPesquisa));
   document.querySelectorAll(".tab[data-area]").forEach(t => t.addEventListener("click", () => {
     document.querySelectorAll(".tab[data-area]").forEach(x => x.setAttribute("aria-pressed", String(x === t)));
     const pesquisa = t.dataset.area === "pesquisa";
