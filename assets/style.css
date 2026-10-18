@@ -246,3 +246,15 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .prevenda-onda{position:absolute;left:0;bottom:0;width:100%;height:clamp(50px,7vw,90px);pointer-events:none}
 .prevenda-onda path{fill:none;stroke:var(--gold);stroke-width:1.2;vector-effect:non-scaling-stroke;opacity:.7}
 .prevenda-onda .eco{stroke:var(--gold-2);opacity:.35}
+
+/* pesquisa de satisfacao: perguntas em fieldset, opcoes como chips de 44 px e escala 0-10
+   em grade de 6 colunas (11 botoes numa linha so ficariam pequenos demais no celular) */
+fieldset.q{border:0;margin:0;padding:0;min-width:0}
+fieldset.q legend{font-weight:600;padding:0;margin-bottom:8px}
+.q-n{display:inline-grid;place-items:center;min-width:26px;height:26px;margin-right:8px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);font:600 13px var(--body);vertical-align:1px}
+.q.falta{box-shadow:inset 3px 0 0 var(--bad);padding-left:12px}
+.opcoes{display:flex;flex-wrap:wrap;gap:8px}
+.opcoes .chip,.escala .chip{display:flex}
+.opcoes .chip span,.escala .chip span{display:flex;align-items:center;min-height:44px;padding:10px 16px;line-height:1.25}
+.escala{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;max-width:420px}
+.escala .chip span{flex:1;justify-content:center;padding:10px 0;font-weight:600}

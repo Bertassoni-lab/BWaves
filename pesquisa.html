@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pesquisa de satisfação · Business Wave</title>
+<meta name="description" content="Pesquisa de satisfação da 5ª edição do Business Wave. São apenas 3 minutinhos.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Pesquisa de satisfação · 5ª edição Business Wave">
+<meta property="og:description" content="São apenas 3 minutinhos. Sua percepção ajuda a construir a 6ª edição.">
+<meta property="og:image" content="https://bw.okgo.dev.br/assets/compartilhar.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vitrine BW · Business Wave">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/logo-bw.png">
+<meta name="theme-color" content="#0c0b09">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/style.css?v=20261018a">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img class="brand-logo" src="assets/logo-bw.png" alt="Business Wave"><b>Vitrine</b></a>
+    <nav><a class="btn sm ghost" href="./">Ver a vitrine</a></nav>
+  </div>
+</header>
+
+<main class="wrap" style="padding-block:32px 64px">
+  <div id="intro" style="display:grid;gap:10px;margin-bottom:26px;max-width:640px">
+    <div class="eyebrow">Pesquisa de satisfação · 5ª edição</div>
+    <h1 id="introTitulo" style="font-style:italic;font-size:clamp(34px,7vw,52px);line-height:1.05"></h1>
+    <p id="introTexto" style="color:var(--muted);margin:0"></p>
+    <p id="introTempo" style="margin:0;color:var(--gold-2)"></p>
+  </div>
+
+  <div id="ja" hidden style="max-width:640px;display:grid;gap:14px">
+    <div class="msg ok">Você já respondeu neste aparelho. Obrigada! 💗</div>
+    <div class="acts"><button class="btn ghost" id="jaDeNovo" type="button">Responder de novo</button><a class="btn ghost" href="./">Ver a vitrine</a></div>
+  </div>
+
+  <form class="form" id="f" novalidate>
+    <div id="perguntas" style="display:grid;gap:22px"></div>
+    <div style="position:absolute;left:-9999px" aria-hidden="true"><label for="empresa_site">Não preencha</label><input id="empresa_site" tabindex="-1" autocomplete="off"></div>
+    <div class="msg err" id="err" hidden></div>
+    <div><button class="btn" id="send" type="submit" style="width:100%;max-width:320px">Enviar respostas</button></div>
+  </form>
+
+  <div id="done" hidden style="max-width:640px;display:grid;gap:14px"></div>
+</main>
+
+<script src="assets/supabase.js"></script>
+<script src="assets/config.js?v=20261015b"></script>
+<script src="assets/bw.js?v=20261017a"></script>
+<script src="assets/pesquisa.js?v=20261018a"></script>
+<script>
+(function () {
+  const { sb, DEMO, esc } = BW, P = BW_PESQUISA;
+  const $ = s => document.querySelector(s);
+  const CHAVE = "bw_pesquisa_" + P.edicao;
+  const PREVENDA = "https://businesswave.com.br/pre-venda-business-wave-2027/?utm_source=vitrine-bw&utm_medium=site&utm_campaign=prevenda-2027&utm_content=pesquisa";
+
+  $("#introTitulo").textContent = P.intro.titulo;
+  $("#introTexto").textContent = P.intro.texto;
+  $("#introTempo").textContent = P.intro.tempo;
+
+  // Desenha as perguntas a partir da definicao: a ordem, os textos e as opcoes sao os de pesquisa.js.
+  const numero = p => p.n ? `<span class="q-n">${p.n}</span>` : "";
+  const opcao = (tipo, c, v, t) => `<label class="chip"><input type="${tipo === "varias" ? "checkbox" : "radio"}" name="${c}" value="${esc(v)}"><span>${esc(t)}</span></label>`;
+  function pergunta(c) {
+    const p = P.perguntas[c];
+    if (p.tipo === "texto" || p.tipo === "curto") {
+      const campo = p.tipo === "texto" ? `<textarea id="i-${c}" maxlength="${p.max}" style="min-height:90px"></textarea>` : `<input id="i-${c}" maxlength="${p.max}" autocomplete="name">`;
+      const ajuda = c === "nome" ? `<span class="h">Só a organização do Business Wave vê.</span>` : "";
+      return `<div class="field q" id="q-${c}"><label for="i-${c}">${numero(p)}${esc(p.texto)}</label>${ajuda}${campo}</div>`;
+    }
+    const itens = p.tipo === "escala"
+      ? Array.from({ length: 11 }, (_, i) => opcao("escala", c, String(i), String(i))).join("")
+      : p.opcoes.map(([v, t]) => opcao(p.tipo, c, v, t)).join("");
+    const outro = p.outro ? `<div class="field" id="q-${c}_outro" hidden><label for="i-${c}_outro">Qual?</label><input id="i-${c}_outro" maxlength="${P.MAX_OUTRO}"></div>` : "";
+    return `<fieldset class="field q" id="q-${c}"><legend>${numero(p)}${esc(p.texto)}${p.obrigatoria ? ' <span class="h">(obrigatória)</span>' : ""}</legend>
+      <div class="${p.tipo === "escala" ? "escala" : "opcoes"}">${itens}</div></fieldset>${outro}`;
+  }
+  $("#perguntas").innerHTML = P.blocos.map(b => `<div class="sub">${esc(b.titulo)}</div>${b.perguntas.map(pergunta).join("")}`).join("");
+
+  // "Outro" marcado abre o "Qual?"; desmarcado, esconde (e coletar() ignora o que ficou escrito).
+  $("#f").addEventListener("change", e => {
+    const c = e.target.name; if (!c) return;
+    const p = P.perguntas[c];
+    if (p && p.outro) $(`#q-${c}_outro`).hidden = !$(`#q-${c} input[value="outro"]`).checked;
+    const q = $(`#q-${c}`); if (q) q.classList.remove("falta");
+  });
+
+  function coletar() {
+    const r = { edicao: P.edicao };
+    P.ordem.forEach(c => {
+      const p = P.perguntas[c];
+      if (p.tipo === "escala" || p.tipo === "uma") {
+        const el = $(`#q-${c} input:checked`); if (el) r[c] = p.tipo === "escala" ? Number(el.value) : el.value;
+      } else if (p.tipo === "varias") {
+        const v = [...document.querySelectorAll(`#q-${c} input:checked`)].map(i => i.value);
+        if (v.length) r[c] = v;
+        if (p.outro && v.includes("outro")) { const t = $(`#i-${c}_outro`).value.trim(); if (t) r[c + "_outro"] = t; }
+      } else { const t = $(`#i-${c}`).value.trim(); if (t) r[c] = t; }
+    });
+    return r;
+  }
+
+  function erro(t) { const e = $("#err"); e.textContent = t; e.hidden = !t; }
+
+  function mostrarFim() {
+    const [titulo, ...resto] = P.encerramento;
+    $("#done").innerHTML = `<div class="msg ok">Respostas enviadas.</div>
+      <h2 style="font-style:italic;font-size:clamp(32px,6vw,44px);line-height:1.05">${esc(titulo)}</h2>
+      ${resto.map((t, i) => `<p style="margin:0;${i === resto.length - 1 ? "color:var(--gold-2);font-weight:600" : "color:var(--muted)"}">${esc(t)}</p>`).join("")}
+      <div class="acts"><a class="btn" href="${esc(PREVENDA)}" target="_blank" rel="noopener">Garantir meu lugar na 6ª edição</a><a class="btn ghost" href="./">Ver a vitrine</a></div>`;
+    $("#f").hidden = true; $("#intro").hidden = true; $("#ja").hidden = true; $("#done").hidden = false;
+    window.scrollTo({ top: 0 });
+  }
+
+  let jaRespondeu = false;
+  try { jaRespondeu = !!localStorage.getItem(CHAVE); } catch (_) {}
+  if (jaRespondeu) { $("#ja").hidden = false; $("#f").hidden = true; }
+  $("#jaDeNovo").addEventListener("click", () => { $("#ja").hidden = true; $("#f").hidden = false; });
+
+  $("#f").addEventListener("submit", async e => {
+    e.preventDefault(); erro("");
+    if ($("#empresa_site").value) return;
+    const r = coletar(), falta = P.faltando(r);
+    if (falta.length) {
+      falta.forEach(c => $(`#q-${c}`).classList.add("falta"));
+      erro("Falta responder: " + falta.map(c => `${P.perguntas[c].n}. ${P.perguntas[c].curto}`).join(" · ") + ".");
+      $(`#q-${falta[0]}`).scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
+    const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando…";
+    try {
+      if (!DEMO) { const { error } = await sb.from("bw_pesquisa").insert(r); if (error) throw error; }
+      try { localStorage.setItem(CHAVE, "1"); } catch (_) {}
+      mostrarFim();
+    } catch (err) {
+      console.warn(err);
+      erro("Não conseguimos enviar agora. Confira a internet e toque de novo em enviar: suas respostas continuam aqui.");
+      btn.disabled = false; btn.textContent = "Enviar respostas";
+    }
+  });
+})();
+</script>
+</body>
+</html>
