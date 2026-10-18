@@ -258,3 +258,31 @@ fieldset.q legend{font-weight:600;padding:0;margin-bottom:8px}
 .opcoes .chip span,.escala .chip span{display:flex;align-items:center;min-height:44px;padding:10px 16px;line-height:1.25}
 .escala{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;max-width:420px}
 .escala .chip span{flex:1;justify-content:center;padding:10px 0;font-weight:600}
+
+/* cartao da pesquisa na pagina inicial: discreto ao lado do da pre-venda (que e' a chamada da casa) */
+.pesquisa-card{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;padding:clamp(20px,4vw,32px);border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+.pesquisa-card h2{font-style:italic;font-size:clamp(28px,5vw,40px);line-height:1.05;margin-top:6px}
+.pesquisa-card p{margin:6px 0 0;color:var(--muted)}
+
+/* resumo da pesquisa no admin: numeros em quadros e uma barra por opcao, de uma cor so.
+   O comprimento diz o tamanho; o numero vai escrito em tinta de texto, nunca na cor da barra. */
+.p-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.p-num{display:grid;gap:4px;align-content:start;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.p-num span{font-size:13px;color:var(--muted)}
+.p-num b{font:600 44px/1 var(--display);color:var(--fg)}
+.p-num small{font:500 16px var(--body);color:var(--muted);margin-left:2px}
+.p-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}
+.p-q{display:grid;gap:8px;align-content:start;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);min-width:0}
+.p-q h3{font:600 15px var(--body)}
+.p-tit{font:600 12px var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.barra{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;font-size:14px}
+.barra b{font-weight:500}
+.barra span{color:var(--muted);font-variant-numeric:tabular-nums}
+.barra i{grid-column:1/-1;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.barra s{display:block;height:100%;border-radius:99px;background:var(--gold)}
+.p-cit{margin:0;padding:8px 0 8px 12px;border-left:2px solid var(--line-2);display:grid;gap:4px;font-size:14px;overflow-wrap:anywhere}
+.p-resp{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:12px 16px;margin-bottom:8px}
+.p-resp summary{cursor:pointer;font-size:14px;overflow-wrap:anywhere}
+.p-resp dl{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;margin:12px 0;font-size:14px}
+.p-resp dt{color:var(--muted);margin-top:8px}
+.p-resp dd{margin:0;overflow-wrap:anywhere}

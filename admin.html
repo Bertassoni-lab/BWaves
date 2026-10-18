@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#0c0b09">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=20261015c">
+<link rel="stylesheet" href="assets/style.css?v=20261018a">
 </head>
 <body>
 <header class="top">
@@ -32,6 +32,11 @@
   </section>
 
   <section id="app" hidden style="display:grid;gap:16px">
+    <div class="tabs" role="group" aria-label="Área do painel">
+      <button class="tab" data-area="cadastros" aria-pressed="true">Cadastros</button>
+      <button class="tab" data-area="pesquisa" aria-pressed="false">Pesquisa</button>
+    </div>
+    <div id="areaCadastros" style="display:grid;gap:16px">
     <div class="sec-head" style="margin:0">
       <div><h2>Cadastros</h2><p id="resumo"></p></div>
       <div class="acts">
@@ -47,6 +52,21 @@
     <div class="adm-list" id="lista"></div>
     <div class="empty" id="vazio" hidden></div>
     <p class="meta" id="atual"></p>
+    </div>
+
+    <div id="areaPesquisa" hidden style="display:grid;gap:18px">
+      <div class="sec-head" style="margin:0">
+        <div><h2>Pesquisa · 5ª edição</h2><p id="pTotal"></p></div>
+        <div class="acts">
+          <a class="btn sm ghost" href="pesquisa.html" target="_blank" rel="noopener">Abrir a pesquisa</a>
+          <button class="btn sm ghost" id="pAtualizar" type="button">Atualizar</button>
+          <button class="btn sm ghost" id="pCsv" type="button">Baixar planilha (CSV)</button>
+        </div>
+      </div>
+      <div id="pResumo"></div>
+      <div id="pAbertas"></div>
+      <div id="pTodas"></div>
+    </div>
   </section>
 </main>
 
@@ -91,6 +111,7 @@
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
 <script src="assets/bw.js?v=20261017a"></script>
+<script src="assets/pesquisa.js?v=20261018a"></script>
 <script>
 (async function () {
   const { sb, DEMO, C, esc, logoHTML, waLink } = BW;
@@ -211,8 +232,8 @@
     } catch (err) { console.error(err); er.textContent = "Não salvou: " + (err.message || err) + ". Tente de novo."; er.hidden = false; }
     finally { btn.disabled = false; btn.textContent = "Salvar alterações"; }
   });
-  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-pressed", String(x === t))); filtro = t.dataset.s; render();
+  document.querySelectorAll(".tab[data-s]").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab[data-s]").forEach(x => x.setAttribute("aria-pressed", String(x === t))); filtro = t.dataset.s; render();
   }));
 
   // lista para a organização (abre como arquivo no navegador)
@@ -223,6 +244,86 @@
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     a.download = "vitrine-bw-cadastros.csv"; document.body.appendChild(a); a.click(); a.remove();
   });
+
+  // pesquisa de satisfacao: resumo, respostas abertas, todas as respostas e planilha
+  const P = BW_PESQUISA;
+  let respostas = null, apagando = null;
+  const num = v => v === null || v === undefined ? "—" : v.toLocaleString("pt-BR");
+  const deram = n => `${n} ${n === 1 ? "deu" : "deram"}`;
+  const quem = x => `${x.nome ? esc(x.nome) : "Anônima"} · ${esc(P.dataBR(x.criado_em))}`;
+  function avisarPesquisa(e) { console.error(e); const m = document.createElement("div"); m.className = "msg err"; m.textContent = "Não deu certo: " + (e.message || e) + ". Tente de novo."; $("#areaPesquisa").prepend(m); setTimeout(() => m.remove(), 6000); }
+
+  async function carregarPesquisa() {
+    if (DEMO) { if (!respostas) respostas = P.exemplos.map(x => ({ ...x })); }
+    else {
+      const a = await sb.from("bw_pesquisa").select("*").order("criado_em", { ascending: false });
+      if (a.error) throw a.error; respostas = a.data;
+    }
+    renderPesquisa();
+  }
+
+  function renderPesquisa() {
+    const r = P.resumo(respostas);
+    $("#pTotal").textContent = r.total === 1 ? "1 resposta" : `${r.total} respostas`;
+    $("#pCsv").disabled = !r.total;
+    if (!r.total) {
+      $("#pResumo").innerHTML = `<div class="empty"><b>Nenhuma resposta ainda.</b>Mande o link ${esc((C.SITE_URL || location.origin) + "/pesquisa.html")} no grupo das participantes.</div>`;
+      $("#pAbertas").innerHTML = $("#pTodas").innerHTML = "";
+      return;
+    }
+    const rec = r.recomendacao, pq = c => `${P.perguntas[c].n}. ${esc(P.perguntas[c].curto)}`;
+    $("#pResumo").innerHTML = `
+      <div class="p-nums">
+        <div class="p-num"><span>Respostas</span><b>${r.total}</b></div>
+        <div class="p-num"><span>Experiência geral</span><b>${num(r.geral.media)}<small>/10</small></b><span>de ${r.geral.n} ${r.geral.n === 1 ? "resposta" : "respostas"}</span></div>
+        <div class="p-num"><span>Recomendaria</span><b>${num(rec.media)}<small>/10</small></b><span>NPS ${num(rec.nps)} · ${deram(rec.promotoras)} 9 ou 10, ${deram(rec.detratoras)} de 0 a 6</span></div>
+      </div>
+      <p class="meta" style="margin:10px 0 0">NPS é a % de quem deu 9 ou 10 menos a % de quem deu de 0 a 6. Vai de −100 a 100.</p>
+      <div class="p-grade" style="margin-top:14px">${Object.entries(r.escolhas).map(([c, e]) => `
+        <div class="p-q" data-q="${c}">
+          <h3>${pq(c)}</h3>
+          <span class="meta">${e.n} de ${r.total} responderam${P.perguntas[c].tipo === "varias" ? " · dava para marcar mais de uma" : ""}</span>
+          ${e.opcoes.map(o => `<div class="barra" title="${esc(o.texto)}: ${o.qtd} (${o.pct}%)"><b>${esc(o.texto)}</b><span>${o.qtd} · ${o.pct}%</span><i><s style="width:${o.pct}%"></s></i></div>`).join("")}
+          ${e.outros.length ? `<div class="meta">Outro: ${e.outros.map(esc).join(" · ")}</div>` : ""}
+        </div>`).join("")}</div>`;
+    $("#pAbertas").innerHTML = `<h3 class="p-tit">Respostas abertas</h3><div class="p-grade">${P.ordem.filter(c => P.perguntas[c].tipo === "texto").map(c => {
+      const lista = respostas.filter(x => x[c]);
+      return `<div class="p-q"><h3>${pq(c)}</h3>${lista.length ? lista.map(x => `<blockquote class="p-cit">${esc(x[c])}<span class="meta">${quem(x)}</span></blockquote>`).join("") : '<span class="meta">Ninguém respondeu esta ainda.</span>'}</div>`;
+    }).join("")}</div>`;
+    $("#pTodas").innerHTML = `<h3 class="p-tit">Todas as respostas</h3>` + respostas.map(x => `
+      <details class="p-resp" data-id="${esc(x.id)}"><summary>${quem(x)} · recomendaria ${num(x.recomendaria)}/10</summary>
+        <dl>${P.ordem.filter(c => c !== "nome").map(c => `<dt>${pq(c)}</dt><dd>${esc(P.rotulo(c, x[c])) || "—"}${x[c + "_outro"] ? " (" + esc(x[c + "_outro"]) + ")" : ""}</dd>`).join("")}</dl>
+        <button class="btn sm ghost" type="button" data-apagar>Apagar</button>
+      </details>`).join("");
+  }
+
+  // Apagar pede dois toques, como o "Aprovar todos": a resposta nao volta.
+  $("#pTodas").addEventListener("click", async e => {
+    const bt = e.target.closest("[data-apagar]"); if (!bt) return;
+    const id = bt.closest("details").dataset.id;
+    if (apagando !== id) {
+      apagando = id; bt.textContent = "Confirmar: apagar";
+      setTimeout(() => { if (apagando === id) { apagando = null; bt.textContent = "Apagar"; } }, 5000);
+      return;
+    }
+    apagando = null;
+    if (!DEMO) {
+      const { data, error } = await sb.from("bw_pesquisa").delete().eq("id", id).select("id");
+      if (error || !data.length) return avisarPesquisa(error || "a resposta não foi apagada");
+    }
+    respostas = respostas.filter(x => String(x.id) !== id); renderPesquisa();
+  });
+  $("#pCsv").addEventListener("click", () => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([P.csv(respostas || [])], { type: "text/csv;charset=utf-8" }));
+    a.download = "pesquisa-bw-5a-edicao.csv"; document.body.appendChild(a); a.click(); a.remove();
+  });
+  $("#pAtualizar").addEventListener("click", () => { if (!DEMO) respostas = null; carregarPesquisa().catch(avisarPesquisa); });
+  document.querySelectorAll(".tab[data-area]").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab[data-area]").forEach(x => x.setAttribute("aria-pressed", String(x === t)));
+    const pesquisa = t.dataset.area === "pesquisa";
+    $("#areaCadastros").hidden = pesquisa; $("#areaPesquisa").hidden = !pesquisa;
+    if (pesquisa && !respostas) carregarPesquisa().catch(avisarPesquisa);
+  }));
 
   async function entrar() {
     $("#login").hidden = true; $("#app").hidden = false; $("#sair").hidden = DEMO;

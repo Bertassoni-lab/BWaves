@@ -113,6 +113,25 @@
     return "﻿" + [cols.map(c => q(c[0])).join(";"), ...respostas.map(r => cols.map(c => q(c[1](r))).join(";"))].join("\n");
   }
 
+  // Respostas de exemplo: so o modo exemplo do admin usa (sem Supabase), para ver o resumo.
+  const exemplos = [
+    { id: "x1", criado_em: "2026-10-17T23:40:00Z", nota_geral: 10, gostou: ["energia", "networking", "palestras"], organizacao: "excelente", ambiente_conexao: "sim_muito",
+      momento: "A fala sobre recomeços.", fez_conexao: "sim_varias", assuntos: ["inteligencia_emocional", "desenvolvimento_pessoal"], participaria: "com_certeza",
+      recomendaria: 10, descreveria: "Acolhimento e negócio na mesma noite.", valor: "convidada", nome: "Bia" },
+    { id: "x2", criado_em: "2026-10-17T22:10:00Z", gostou: ["networking"], assuntos: ["financas"], recomendaria: 9 },
+    { id: "x3", criado_em: "2026-10-17T21:30:00Z", nota_geral: 7, gostou: ["dinamicas"], organizacao: "regular", ambiente_conexao: "nao_tanto", fez_conexao: "nao",
+      melhorar: "Começar no horário.", assuntos: ["empreendedorismo"], participaria: "talvez", recomendaria: 6, valor: "abaixo" },
+    { id: "x4", criado_em: "2026-10-17T20:50:00Z", nota_geral: 8, gostou: ["gastronomia", "outro"], gostou_outro: "O brinde", organizacao: "boa", ambiente_conexao: "sim_parcialmente",
+      melhorar: "O som estava baixo no fundo da sala.", fez_conexao: "ainda_nao", assuntos: ["comunicacao", "outro"], assuntos_outro: "Vendas pelo WhatsApp",
+      participaria: "provavelmente", recomendaria: 8, valor: "correspondeu_parcial", nome: "Carla" },
+    { id: "x5", criado_em: "2026-10-17T19:20:00Z", nota_geral: 9, gostou: ["palestras", "ambiente"], organizacao: "muito_boa", ambiente_conexao: "sim_muito", fez_conexao: "sim_uma",
+      assuntos: ["lideranca"], participaria: "com_certeza", recomendaria: 9, valor: "correspondeu_total" },
+    { id: "x6", criado_em: "2026-10-17T18:05:00Z", nota_geral: 10, gostou: ["networking", "energia"], organizacao: "excelente", ambiente_conexao: "sim_muito",
+      momento: "A foto de todas juntas no final.", inspiracao: "Organizar melhor meu Instagram.", fez_conexao: "sim_varias",
+      melhorar: "Mais tempo para conversar entre as palestras.", assuntos: ["posicionamento", "financas"], participaria: "com_certeza", recomendaria: 10,
+      descreveria: "Uma noite de mulheres que se ajudam de verdade.", valor: "superou", nome: "Ana" }
+  ];
+
   window.BW_PESQUISA = {
     edicao: 5,
     intro: {
@@ -126,6 +145,6 @@
       "Foi um prazer ter você conosco na 5ª edição.",
       "Nos vemos na 6ª! 💗"
     ],
-    MAX_OUTRO, blocos, perguntas, ordem, faltando, nps, rotulo, resumo, csv, dataBR
+    MAX_OUTRO, blocos, perguntas, ordem, faltando, nps, rotulo, resumo, csv, dataBR, exemplos
   };
 })();
