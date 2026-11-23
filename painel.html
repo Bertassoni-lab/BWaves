@@ -65,9 +65,9 @@
         <div class="field"><label for="segmento">Segmento</label><select id="segmento"></select></div>
       </div>
       <div class="offer field">
-        <label for="oferta_bw" style="color:var(--gold-2)">Oferta exclusiva BW</label>
-        <span class="h">Uma condição só para quem é do Business Wave.</span>
-        <input id="oferta_bw" maxlength="160">
+        <span class="l" style="color:var(--gold-2)">Oferta exclusiva BW</span>
+        <span class="h">Uma condição só para quem é do Business Wave. Escolha o tipo e diga em quê.</span>
+        <div id="ofertaCampos" class="oferta-campos"></div>
         <label for="oferta_link" style="margin-top:8px">Link da oferta <span class="h">(opcional)</span></label>
         <span class="h">Se a oferta tem página própria (loja, agenda, página de vendas), o botão “Quero essa oferta” leva para lá. Sem link, ele abre o seu WhatsApp.</span>
         <input id="oferta_link" maxlength="300" inputmode="url" placeholder="www.seunegocio.com.br/oferta">
@@ -97,16 +97,18 @@
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015d"></script>
 <script src="assets/bw.js?v=20261123a"></script>
+<script src="assets/oferta.js?v=20261123a"></script>
 <script>
 (async function () {
   const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos, iniciais } = BW;
   const $ = s => document.querySelector(s);
-  const CAMPOS = ["responsavel","nome_negocio","whatsapp","segmento","oferta_bw","oferta_link","instagram","cidade","descricao","ofereco","preciso","site","email"];
+  const CAMPOS = ["responsavel","nome_negocio","whatsapp","segmento","oferta_link","instagram","cidade","descricao","ofereco","preciso","site","email"];
   const token = (location.hash.slice(1) || new URLSearchParams(location.search).get("t") || "").trim();
   const valido = /^[0-9a-f-]{36}$/i.test(token);
   let perfil = null, novoLogo = null, tirarLogo = false;
 
   SEGMENTOS.forEach(s => $("#segmento").insertAdjacentHTML("beforeend", `<option>${esc(s)}</option>`));
+  const oferta = BW_OFERTA.campos($("#ofertaCampos"));
 
   function mostrarLogo(src, nome) {
     $("#logoBox").innerHTML = src ? `<img class="logo" src="${esc(src)}" alt="">` : `<span class="logo">${esc(iniciais(nome))}</span>`;
@@ -124,6 +126,7 @@
     $("#status").innerHTML = `<span class="pill ${cls}">${esc(txt)}</span>`;
     $("#avisoAnalise").hidden = p.status !== "pendente";
     CAMPOS.forEach(c => $("#" + c).value = p[c] ?? "");
+    oferta.preencher(p);
     if (p.segmento && ![...$("#segmento").options].some(o => o.value === p.segmento)) { $("#segmento").insertAdjacentHTML("beforeend", `<option>${esc(p.segmento)}</option>`); $("#segmento").value = p.segmento; }
     mostrarLogo(p.logo_url, p.nome_negocio);
     const link = (C.SITE_URL || location.origin) + "/#perfil-" + p.id;
@@ -164,11 +167,13 @@
     const v = c => $("#" + c).value.trim();
     if (!v("responsavel") || !v("nome_negocio") || !v("segmento")) return erro("Nome, negócio e segmento não podem ficar vazios.");
     if (!v("whatsapp") || soDigitos(v("whatsapp")).length < 10) return erro("Confira o WhatsApp: coloque o DDD e o número.");
+    const erroOferta = oferta.erro(); if (erroOferta) return erro(erroOferta);
     const oferta_link = BW.linkOferta(v("oferta_link"));
     if (oferta_link === null) return erro("Confira o link da oferta: copie o endereço da página, sem espaços.");
     const dados = {};
     CAMPOS.forEach(c => dados[c] = v(c));
     dados.oferta_link = oferta_link;
+    Object.assign(dados, oferta.ler());
     dados.whatsapp = soDigitos(v("whatsapp")); dados.instagram = ig(v("instagram"));
     const btn = $("#salvar"); btn.disabled = true; btn.textContent = "Salvando…";
     try {

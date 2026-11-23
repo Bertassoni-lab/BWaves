@@ -310,3 +310,8 @@ fieldset.q legend{font-weight:600;padding:0;margin-bottom:8px}
 .mini-offer .selo{display:inline-block;margin:0 6px 4px 0;color:var(--gold-ink);font-size:12px;letter-spacing:.06em;text-transform:none}
 .card .mini-offer{align-self:start}
 .setas.sem{display:none}
+
+/* campos guiados da oferta (cadastro, painel e admin) e a previa de como fica na vitrine */
+.oferta-campos{display:grid;gap:12px}
+.oferta-previa{display:grid;gap:6px}
+.tag.rev{border-color:var(--bad);color:var(--bad)}

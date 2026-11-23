@@ -68,5 +68,60 @@
     return "";
   }
 
-  window.BW_OFERTA = { TIPOS, MAX_DETALHE, tipo, normalizarCaixa, selo, frase, resumo, validar };
+  const esc = x => String(x ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const numero = x => { const t = String(x ?? "").trim().replace(",", "."); return t === "" || isNaN(Number(t)) ? null : Number(t); };
+
+  // Os campos guiados com a previa, iguais no cadastro, no painel e no admin. Oferta antiga
+  // (texto livre, sem tipo) aparece como "Manter como esta": salvar o resto do perfil nao pode
+  // apagar a oferta de quem ainda nao converteu.
+  function campos(el, prefixo = "") {
+    const id = n => prefixo + n;
+    el.innerHTML = `
+      <div class="field"><label for="${id("oferta_tipo")}">Tipo de oferta</label><select id="${id("oferta_tipo")}"></select></div>
+      <div class="two oferta-linha">
+        <div class="field oferta-valor"><label for="${id("oferta_valor")}"></label><input id="${id("oferta_valor")}" inputmode="decimal" maxlength="9" autocomplete="off"></div>
+        <div class="field"><label for="${id("oferta_detalhe")}"></label><input id="${id("oferta_detalhe")}" maxlength="${MAX_DETALHE}" autocomplete="off"></div>
+      </div>
+      <div class="oferta-previa" aria-live="polite"><span class="h">Como vai aparecer na vitrine</span><div class="mini-offer"></div></div>`;
+    const $ = n => el.querySelector("#" + id(n));
+    const sel = $("oferta_tipo"), valor = $("oferta_valor"), det = $("oferta_detalhe");
+    let antiga = "";
+
+    function ler() {
+      if (sel.value === "__manter") return { oferta_tipo: null, oferta_valor: null, oferta_detalhe: null, oferta_bw: antiga };
+      const t = tipo(sel.value);
+      if (!t) return { oferta_tipo: null, oferta_valor: null, oferta_detalhe: null, oferta_bw: null };
+      const o = { oferta_tipo: t.codigo, oferta_valor: t.valor ? numero(valor.value) : null, oferta_detalhe: det.value.trim() || null };
+      o.oferta_bw = frase(o.oferta_tipo, o.oferta_valor, o.oferta_detalhe || "");
+      return o;
+    }
+    function atualizar() {
+      const t = tipo(sel.value), o = ler();
+      el.querySelector(".oferta-linha").hidden = !t;
+      el.querySelector(".oferta-valor").hidden = !t || !t.valor;
+      if (t) {
+        el.querySelector(`label[for="${id("oferta_valor")}"]`).textContent = t.valor === "pct" ? "Desconto (%)" : "Desconto (R$)";
+        el.querySelector(`label[for="${id("oferta_detalhe")}"]`).textContent = t.pergunta;
+        det.placeholder = t.exemplo; valor.placeholder = t.valor === "pct" ? "10" : "20";
+      }
+      const mostrar = o.oferta_bw && !(t && t.valor && o.oferta_valor === null);
+      el.querySelector(".oferta-previa").hidden = !mostrar;
+      if (mostrar) el.querySelector(".oferta-previa .mini-offer").innerHTML = `<b class="selo">${esc(selo(o))}</b> ${esc(resumo(o))}`;
+    }
+    function preencher(p = {}) {
+      antiga = !p.oferta_tipo && p.oferta_bw ? p.oferta_bw : "";
+      const curto = antiga.length > 40 ? antiga.slice(0, 40) + "…" : antiga;
+      sel.innerHTML = (antiga ? `<option value="__manter">Manter como está: “${esc(curto)}”</option>` : "")
+        + `<option value="">Sem oferta por enquanto</option>` + TIPOS.map(t => `<option value="${t.codigo}">${esc(t.nome)}</option>`).join("");
+      sel.value = p.oferta_tipo || (antiga ? "__manter" : "");
+      valor.value = p.oferta_valor ?? ""; det.value = p.oferta_detalhe ?? "";
+      atualizar();
+    }
+    const erro = () => sel.value === "__manter" || !sel.value ? "" : validar(ler());
+    el.addEventListener("input", atualizar); el.addEventListener("change", atualizar);
+    preencher();
+    return { ler, erro, preencher };
+  }
+
+  window.BW_OFERTA = { TIPOS, MAX_DETALHE, tipo, normalizarCaixa, selo, frase, resumo, validar, campos };
 })();

@@ -45,9 +45,9 @@
     </div>
 
     <div class="offer field">
-      <label for="oferta_bw" style="color:var(--gold-2)">Oferta exclusiva BW</label>
-      <span class="h">Uma condição só para quem é do Business Wave. É o que mais chama atenção na vitrine. Ex.: 10% de desconto, avaliação gratuita, frete grátis.</span>
-      <input id="oferta_bw" maxlength="160" placeholder="Ex.: 15% off na primeira compra">
+      <span class="l" style="color:var(--gold-2)">Oferta exclusiva BW</span>
+      <span class="h">Uma condição só para quem é do Business Wave. É o que mais chama atenção na vitrine. Escolha o tipo e diga em quê: a vitrine mostra todas no mesmo formato.</span>
+      <div id="ofertaCampos" class="oferta-campos"></div>
       <label for="oferta_link" style="margin-top:8px">Link da oferta <span class="h">(opcional)</span></label>
       <span class="h">Se a oferta tem página própria (loja, agenda, página de vendas), o botão “Quero essa oferta” leva para lá. Sem link, ele abre o seu WhatsApp.</span>
       <input id="oferta_link" maxlength="300" inputmode="url" placeholder="www.seunegocio.com.br/oferta">
@@ -132,11 +132,13 @@
 <script src="assets/supabase.js"></script>
 <script src="assets/config.js?v=20261015b"></script>
 <script src="assets/bw.js?v=20261123a"></script>
+<script src="assets/oferta.js?v=20261123a"></script>
 <script>
 (function () {
   const { sb, DEMO, C, SEGMENTOS, esc, ig, soDigitos, waLink } = BW;
   const $ = s => document.querySelector(s);
   SEGMENTOS.forEach(s => $("#segmento").insertAdjacentHTML("beforeend", `<option>${esc(s)}</option>`));
+  const oferta = BW_OFERTA.campos($("#ofertaCampos"));
 
   let logoBlob = null;
   $("#logo").addEventListener("change", async e => {
@@ -155,6 +157,7 @@
     if (faltando.length) return erro("Falta preencher " + faltando.map(x => x[1]).join(", ") + ".");
     if (soDigitos(v("whatsapp")).length < 10) return erro("Confira o WhatsApp: coloque o DDD e o número.");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) return erro("Confira o e-mail: parece incompleto.");
+    const erroOferta = oferta.erro(); if (erroOferta) return erro(erroOferta);
     const oferta_link = BW.linkOferta(v("oferta_link"));
     if (oferta_link === null) return erro("Confira o link da oferta: copie o endereço da página, sem espaços.");
     if (!$("#consentimento").checked) return erro("Para publicar, precisamos da sua autorização logo acima do botão.");
@@ -174,7 +177,7 @@
         nome_negocio: v("nome_negocio"), responsavel: v("responsavel"), segmento: v("segmento"),
         cidade: v("cidade") || null, descricao: v("descricao") || null,
         instagram: ig(v("instagram")) || null, whatsapp: soDigitos(v("whatsapp")), site: v("site") || null,
-        logo_url, oferta_bw: v("oferta_bw") || null, oferta_link: oferta_link || null, ofereco: v("ofereco") || null, preciso: v("preciso") || null,
+        logo_url, ...oferta.ler(), oferta_link: oferta_link || null, ofereco: v("ofereco") || null, preciso: v("preciso") || null,
         email: v("email").toLowerCase(), consentimento: true, token_edicao
       };
       if (!DEMO) { const { error } = await sb.from("bw_perfis").insert(row); if (error) throw error; }
