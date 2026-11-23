@@ -63,6 +63,17 @@ Objetivo: vitrine dos negócios das mulheres do BW com **oferta exclusiva BW**, 
 - Modo exemplo: com `SUPABASE_URL` vazio em `assets/config.js` o site roda com perfis de exemplo e não grava nada. Útil para testar layout (`python3 -m http.server`).
 - Com o config real, testar o fluxo completo: cadastro → aparece em "Esperando aprovação" no admin → aprovar → aparece na vitrine → editar → painel da participante.
 
+## Mudança para a hospedagem da Vitória (decidida em 23/11/2026, a fazer)
+- A Vitória comprou uma hospedagem própria na Hostinger (plano **Premium**, conta `vitoriamdfl@gmail.com`, vence em 2030-11-12) para a vitrine sair da conta da OkGo. O site de destino é **`apt-darkblue-bee-16.hostingersite.com`** (endereço temporário da Hostinger).
+- O Thiago tem **acesso de colaborador** a essa conta pelo hPanel. O conector da Hostinger desta conta só enxerga a conta compartilhada depois de reconectado em claude.ai/customize/connectors **e numa sessão nova** (o conector é lido quando a sessão começa). Para conferir: `hosting_orders_list` tem de mostrar um contrato além do `200186022` da OkGo.
+- **O conteúdo que já está nesse site pode ser substituído** (confirmado pelo Thiago em 23/11/2026): a prévia "…PARA DESPERTAR" é modelo, não projeto da Vitória.
+- Premium serve: a vitrine é estática. O aviso de "aplicações web só no Unlimited" é sobre Node.js e não se aplica.
+- O que **não muda**: Supabase (banco, logins das admins, respostas da pesquisa) e o repositório no GitHub. Mudar de casa é ligar o deploy automático do GitHub (`Bertassoni-lab/BWaves`, `main`) no site novo, conferir os arquivos e apontar o domínio.
+- **Domínio ainda a decidir** com o Thiago: manter `bw.okgo.dev.br` (o DNS do `okgo.dev.br` passa a apontar o subdomínio para a conta nova) ou ir para um domínio do Business Wave (pendência antiga: `vitrine.businesswave.com.br`). Se mudar de domínio:
+  - Trocar `SITE_URL` em `assets/config.js`, as imagens `og:image` com endereço absoluto e os QR (`assets/qr-*.svg`).
+  - **`bw.okgo.dev.br` tem de continuar respondendo com redirecionamento** para o endereço novo, mantendo o caminho: links de perfil, de painel (`painel.html#<token>`) e da pesquisa já foram mandados às participantes. O `#` do painel é preservado pelo navegador no redirecionamento.
+- Até o domínio virar, a vitrine continua no ar em `bw.okgo.dev.br`, na conta da OkGo: a mudança não tem hora sem site.
+
 ## Deploy
 - Auto-deploy da Hostinger ligado ao GitHub (repo `Bertassoni-lab/BWaves`, branch `main`, raiz do site bw.okgo.dev.br).
 - **O webhook falhou algumas vezes.** Depois de cada push, conferir se os arquivos no servidor mudaram (hPanel ou API da Hostinger). Se não mudaram, salvar de novo as configurações de auto-deploy (isso dispara o deploy na hora).
