@@ -45,6 +45,20 @@
     const s = String(u || "").trim(); if (!s) return "";
     const l = safeUrl(s); return /^https?:\/\/\S+$/i.test(l) && l.length <= 300 ? l : null;
   };
+  // Vitrine em linhas por segmento: segmento com 2 ou mais negocios ganha linha propria, na
+  // ordem de quem tem mais; sozinhos, "Outro" e sem segmento vao para "Mais negocios", no fim.
+  // Linha de um negocio so' nao e' linha, e' um cartao perdido.
+  function agruparPorSegmento(lista) {
+    const grupos = new Map();
+    lista.forEach(p => { const k = p.segmento || ""; if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(p); });
+    const linhas = [...grupos].filter(([k, ps]) => k && k !== "Outro" && ps.length >= 2)
+      .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0], "pt-BR"))
+      .map(([segmento, perfis]) => ({ segmento, perfis }));
+    const proprias = new Set(linhas.map(l => l.segmento));
+    const resto = lista.filter(p => !proprias.has(p.segmento || ""));
+    if (resto.length) linhas.push({ segmento: "Mais negócios", perfis: resto });
+    return linhas;
+  }
   // Para buscar: no celular quase ninguem digita acento ("estetica" tem de achar "Estetica" com acento).
   const semAcento = s => String(s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -59,7 +73,7 @@
     return await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
   }
 
-  window.BW = { C, DEMO, sb, SEGMENTOS, listarVitrine, esc, iniciais, soDigitos, ig, logoHTML, waLink, safeUrl, linkOferta, semAcento, reduzirFoto };
+  window.BW = { C, DEMO, sb, SEGMENTOS, listarVitrine, esc, iniciais, soDigitos, ig, logoHTML, waLink, safeUrl, linkOferta, semAcento, reduzirFoto, agruparPorSegmento };
 
   if (DEMO) document.addEventListener("DOMContentLoaded", () => {
     const b = document.createElement("div"); b.className = "demo";
