@@ -135,3 +135,123 @@ alter table public.bw_pesquisa enable row level security;
 create policy bw_pesquisa_enviar on public.bw_pesquisa for insert to anon, authenticated with check (true);
 create policy bw_pesquisa_admin_ler on public.bw_pesquisa for select to authenticated using (public.bw_is_admin());
 create policy bw_pesquisa_admin_apagar on public.bw_pesquisa for delete to authenticated using (public.bw_is_admin());
+
+-- 24/11/2026 · Ofertas guiadas (migracao bw_ofertas_guiadas), aplicada antes de publicar a vitrine em linhas.
+alter table public.bw_perfis
+  add column oferta_tipo text check (oferta_tipo in ('desconto_pct', 'desconto_valor', 'gratis', 'brinde', 'especial')),
+  add column oferta_valor numeric(10,2) check (oferta_valor > 0 and oferta_valor <= 100000),
+  add column oferta_detalhe text check (char_length(oferta_detalhe) <= 120),
+  add column oferta_revisar boolean not null default false;
+alter table public.bw_perfis add constraint bw_perfis_oferta_pct
+  check (oferta_tipo is distinct from 'desconto_pct' or oferta_valor between 1 and 100);
+-- leitura publica dos campos que a vitrine desenha; oferta_revisar e' so' do admin
+grant select (oferta_tipo, oferta_valor, oferta_detalhe) on public.bw_perfis to anon;
+
+-- bw_meu_perfil passa a devolver os campos. A versao anterior e' renomeada (a ferramenta do
+-- Supabase usada pelo Claude trava em DROP) e fica sem permissao para ninguem.
+alter function public.bw_meu_perfil(uuid) rename to bw_meu_perfil_v2;
+revoke all on function public.bw_meu_perfil_v2(uuid) from public, anon, authenticated;
+create function public.bw_meu_perfil(p_token uuid)
+returns table (id uuid, status text, tipo text, nome_negocio text, responsavel text, segmento text, cidade text,
+  descricao text, instagram text, whatsapp text, site text, logo_url text, oferta_bw text, oferta_link text,
+  oferta_tipo text, oferta_valor numeric, oferta_detalhe text, ofereco text, preciso text, email text)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.status, p.tipo, p.nome_negocio, p.responsavel, p.segmento, p.cidade, p.descricao, p.instagram,
+         p.whatsapp, p.site, p.logo_url, p.oferta_bw, p.oferta_link, p.oferta_tipo, p.oferta_valor, p.oferta_detalhe,
+         p.ofereco, p.preciso, p.email
+  from public.bw_perfis p where p.token_edicao = p_token;
+$$;
+revoke all on function public.bw_meu_perfil(uuid) from public;
+grant execute on function public.bw_meu_perfil(uuid) to anon, authenticated;
+
+-- bw_atualizar_meu_perfil grava os campos; converter para o formato novo tira da revisao
+create or replace function public.bw_atualizar_meu_perfil(p_token uuid, p_dados jsonb)
+returns uuid
+language plpgsql security definer set search_path = public as $$
+declare v_id uuid; v_link text := nullif(trim(p_dados->>'oferta_link'), '');
+begin
+  if v_link is not null and v_link !~* '^https?://' then v_link := 'https://' || v_link; end if;
+  update public.bw_perfis p set
+    nome_negocio = coalesce(nullif(trim(p_dados->>'nome_negocio'), ''), p.nome_negocio),
+    responsavel  = coalesce(nullif(trim(p_dados->>'responsavel'), ''), p.responsavel),
+    segmento     = coalesce(nullif(trim(p_dados->>'segmento'), ''), p.segmento),
+    email        = coalesce(nullif(trim(p_dados->>'email'), ''), p.email),
+    tipo         = case when p_dados->>'tipo' in ('participante','patrocinadora','parceira') then p_dados->>'tipo' else p.tipo end,
+    cidade    = case when p_dados ? 'cidade'    then nullif(trim(p_dados->>'cidade'), '')    else p.cidade end,
+    descricao = case when p_dados ? 'descricao' then nullif(trim(p_dados->>'descricao'), '') else p.descricao end,
+    instagram = case when p_dados ? 'instagram' then nullif(trim(p_dados->>'instagram'), '') else p.instagram end,
+    whatsapp  = case when p_dados ? 'whatsapp'  then nullif(trim(p_dados->>'whatsapp'), '')  else p.whatsapp end,
+    site      = case when p_dados ? 'site'      then nullif(trim(p_dados->>'site'), '')      else p.site end,
+    logo_url  = case when p_dados ? 'logo_url'  then nullif(trim(p_dados->>'logo_url'), '')  else p.logo_url end,
+    oferta_bw = case when p_dados ? 'oferta_bw' then nullif(trim(p_dados->>'oferta_bw'), '') else p.oferta_bw end,
+    oferta_link = case when p_dados ? 'oferta_link' then v_link else p.oferta_link end,
+    oferta_tipo = case when p_dados ? 'oferta_tipo' then nullif(trim(p_dados->>'oferta_tipo'), '') else p.oferta_tipo end,
+    oferta_valor = case when p_dados ? 'oferta_valor' then nullif(trim(p_dados->>'oferta_valor'), '')::numeric else p.oferta_valor end,
+    oferta_detalhe = case when p_dados ? 'oferta_detalhe' then nullif(trim(p_dados->>'oferta_detalhe'), '') else p.oferta_detalhe end,
+    oferta_revisar = case when nullif(trim(p_dados->>'oferta_tipo'), '') is not null then false else p.oferta_revisar end,
+    ofereco   = case when p_dados ? 'ofereco'   then nullif(trim(p_dados->>'ofereco'), '')   else p.ofereco end,
+    preciso   = case when p_dados ? 'preciso'   then nullif(trim(p_dados->>'preciso'), '')   else p.preciso end
+  where p.token_edicao = p_token
+  returning p.id into v_id;
+  if v_id is null then raise exception 'link inválido'; end if;
+  return v_id;
+end;
+$$;
+
+-- 24/11/2026 · Conversao das 22 ofertas para o formato guiado (dados, junto da migracao acima).
+-- Texto de antes, para o caso de precisar voltar alguma (id8 · oferta_bw):
+--   00f77423 · Passeio de Lancha - Roteiro 3 Ilhas = Compre 2, pague 1.
+--   10494d96 · 10%
+--   1b831dbe · 1⁰ Diagnóstico Empresarial e Orientações Gratuito
+--   2683a315 · Página web - 15%
+--   2b987707 · 10% na primeira compra
+--   2c105b81 · 10%
+--   4369d58c · Leticia
+--   49101cd2 · 5% de desconto
+--   6bab488d · Diagnóstico Gratuito para empresas
+--   78589de9 · 10%
+--   84ade812 · 10,00 de desconto na próxima compra
+--   9416af20 · 5%
+--   9501a6b1 · 10% nos serviços de staff
+--   afeadb66 · 20%
+--   b857da92 · 10% off
+--   bb8eb686 · Site Vendedor
+--   c524967c · 5% off
+--   cd3103da · Avaliação gratuita
+--   de44ad83 · 30%
+--   e0eca7a2 · 5%
+--   e5d775d1 · Matrícula Grátis
+--   eac4122a · 5%
+update public.bw_perfis p set oferta_tipo = c.tipo, oferta_valor = c.valor, oferta_detalhe = c.detalhe,
+  oferta_revisar = c.revisar,
+  oferta_bw = case c.tipo
+    when 'desconto_pct' then trim(trim(to_char(c.valor, 'FM999990')) || '% de desconto ' || coalesce(c.detalhe, ''))
+    when 'desconto_valor' then trim('R$ ' || trim(to_char(c.valor, 'FM999990')) || ' de desconto ' || coalesce(c.detalhe, ''))
+    when 'gratis' then 'Grátis: ' || c.detalhe
+    when 'especial' then upper(left(c.detalhe, 1)) || substr(c.detalhe, 2)
+    else p.oferta_bw end
+from (values
+  ('de44ad83', 'desconto_pct', 30::numeric, null::text, true),
+  ('b857da92', 'desconto_pct', 10, null, true),
+  ('78589de9', 'desconto_pct', 10, null, true),
+  ('2b987707', 'desconto_pct', 10, 'na primeira compra', false),
+  ('6bab488d', 'gratis', null, 'diagnóstico para empresas', false),
+  ('cd3103da', 'gratis', null, 'avaliação', false),
+  ('eac4122a', 'desconto_pct', 5, null, true),
+  ('4369d58c', null, null, null, true),
+  ('e5d775d1', 'gratis', null, 'matrícula', false),
+  ('2c105b81', 'desconto_pct', 10, null, true),
+  ('9501a6b1', 'desconto_pct', 10, 'nos serviços de staff', false),
+  ('00f77423', 'especial', null, 'compre 2, pague 1 no passeio de lancha Roteiro 3 Ilhas', false),
+  ('10494d96', 'desconto_pct', 10, null, true),
+  ('bb8eb686', null, null, null, true),
+  ('c524967c', 'desconto_pct', 5, null, true),
+  ('1b831dbe', 'gratis', null, 'primeiro diagnóstico empresarial e orientações', false),
+  ('afeadb66', 'desconto_pct', 20, null, true),
+  ('2683a315', 'desconto_pct', 15, 'na criação de página web', false),
+  ('84ade812', 'desconto_valor', 10, 'na próxima compra', false),
+  ('e0eca7a2', 'desconto_pct', 5, null, true),
+  ('9416af20', 'desconto_pct', 5, null, true),
+  ('49101cd2', 'desconto_pct', 5, null, true)
+) as c(id8, tipo, valor, detalhe, revisar)
+where p.id::text like c.id8 || '%' and p.oferta_bw is not null;
